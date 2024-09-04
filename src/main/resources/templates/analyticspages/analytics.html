@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аналитика</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .navbar {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000; /* Убедитесь, что navbar находится поверх других элементов */
+        }
+        .navbar button {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            cursor: pointer;
+            font-size: 18px;
+            text-align: center;
+            border-radius: 5px;
+        }
+        .navbar button:hover {
+            background-color: #555;
+        }
+        .container {
+            display: flex;
+            margin-top: 60px; /* Отступ для navbar */
+            height: calc(100vh - 60px); /* Высота контейнера с учетом navbar */
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #f4f4f4;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 60px; /* Отступ для navbar */
+            bottom: 0;
+            z-index: 500; /* Убедитесь, что sidebar находится под navbar */
+        }
+        .sidebar button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0; /* Вертикальные отступы между кнопками */
+            border: none;
+            background-color: #ddd; /* Цвет фона кнопок */
+            text-align: center;
+            cursor: pointer;
+            font-size: 18px;
+            border-radius: 5px;
+        }
+        .sidebar button:hover {
+            background-color: #ccc;
+        }
+        .content {
+            margin-left: 270px;
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .content-container {
+            width: 97%;
+            height: 99%;
+            background-color: #ddd; /* Цвет фона контейнера */
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .content-container p {
+            font-size: 24px; /* Увеличенный размер шрифта */
+            color: #333; /* Темно-серый цвет текста для контраста с фоном */
+        }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <button onclick="location.href='/profile'">Профиль</button>
+    <button onclick="location.href='/profile/holders'">Счета</button>
+    <button onclick="location.href='/profile/operations'">Операции</button>
+    <button onclick="location.href='/profile/analytics'">Аналитика</button>
+</div>
+<div class="container">
+    <div class="sidebar">
+        <button onclick="location.href='/profile/analytics/plans'">Планы</button>
+        <button onclick="location.href='/profile/analytics/compare'">Сравнение периодов</button>
+        <button onclick="location.href='/profile/analytics/categoryChart?expOrInc=EXP'">Расходы по категориям</button>
+        <button onclick="location.href='/profile/analytics/categoryChart?expOrInc=INC'">Доходы по категориям</button>
+        <button onclick="location.href='/profile/analytics/yearTrend'">Тренд расходов</button>
+        <button onclick="location.href='/profile/analytics/balanceDynamic'">Динамика баланса</button>
+    </div>
+    <div class="content">
+        <div class="content-container">
+            <p>Выберите пункт меню для отображения информации.</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

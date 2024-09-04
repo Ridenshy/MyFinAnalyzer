@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Планы</title>
+    <style>
+        /* Стили остаются прежними */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .navbar {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        .navbar button {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            cursor: pointer;
+            font-size: 18px;
+            text-align: center;
+            border-radius: 5px;
+        }
+        .navbar button:hover {
+            background-color: #555;
+        }
+        .container {
+            display: flex;
+            margin-top: 60px;
+            height: calc(100vh - 60px);
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #f4f4f4;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 60px;
+            bottom: 0;
+            z-index: 500;
+        }
+        .sidebar button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            background-color: #ddd;
+            text-align: center;
+            cursor: pointer;
+            font-size: 18px;
+            border-radius: 5px;
+        }
+        .sidebar button:hover {
+            background-color: #ccc;
+        }
+        .content {
+            margin-left: 270px;
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .content-container {
+            width: 97%;
+            height: 99%;
+            background-color: #ddd;
+            border-radius: 5px;
+            display: flex;
+        }
+        .content-column {
+            width: 70%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .content-column-scrollbox {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px;
+            gap: 20px;
+            width: 15%;
+        }
+        .chart {
+            width: 700px;
+            height: 340px;
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .info-row {
+            text-align: center;
+        }
+        .info-row label {
+            font-size: 18px;
+            margin-right: 10px;
+        }
+        .info-row span {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .button-group {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            align-items: center;
+        }
+        .button-group button {
+            background-color: #555;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        .button-group button:hover {
+            background-color: #333;
+        }
+        .button-group-del-edit {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            align-items: center;
+        }
+        .button-group-del-edit button {
+            background-color: #999;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        .button-group-del-edit button:hover {
+            background-color: #555;
+        }
+        .plan-container {
+            width: 92%;
+            background-color: #FFFAFA;
+            border-radius: 5px;
+            padding: 15px;
+
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .plan-container h3 {
+            margin-top: 0;
+        }
+        .form-container {
+            display: none;
+            background-color: #fff;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 95%;
+        }
+        .form-container label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        .form-container input, .form-container select {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .month-navigation {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .month-navigation form {
+            display: inline;
+            margin: 0 10px;
+        }
+        .month-navigation button {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 10px 5px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        .month-navigation button:hover {
+            background-color: #555;
+        }
+        .scroll-box {
+            background-color: white;
+            overflow-y: auto; /* Включает вертикальную прокрутку */
+            width: 100%; /* Задает ширину 100% от родительского элемента */
+            height: 100%;
+            align-items: center;
+        }
+    </style>
+    <script>
+        function toggleForm(formId) {
+            const forms = document.querySelectorAll('.form-container');
+            forms.forEach(form => form.style.display = 'none'); // Скрыть все формы
+            document.getElementById(formId).style.display = 'block'; // Показать выбранную форму
+        }
+    </script>
+</head>
+<body>
+<div class="navbar">
+    <button onclick="location.href='/profile'">Профиль</button>
+    <button onclick="location.href='/profile/holders'">Счета</button>
+    <button onclick="location.href='/profile/operations'">Операции</button>
+    <button onclick="location.href='/profile/analytics'">Аналитика</button>
+</div>
+
+<div class="container">
+    <div class="sidebar">
+            <button onclick="location.href='/profile/analytics/plans'">Планы</button>
+            <button onclick="location.href='/profile/analytics/compare'">Сравнение периодов</button>
+            <button onclick="location.href='/profile/analytics/categoryChart?expOrInc=EXP'">Расходы по категориям</button>
+            <button onclick="location.href='/profile/analytics/categoryChart?expOrInc=INC'">Доходы по категориям</button>
+            <button onclick="location.href='/profile/analytics/yearTrend'">Тренд расходов</button>
+            <button onclick="location.href='/profile/analytics/balanceDynamic'">Динамика баланса</button>
+    </div>
+    <div class="content">
+        <div class="content-container">
+            <div class="content-column">
+                <div class="month-navigation">
+                    <form th:action="@{/profile/analytics/plans}" method="get">
+                        <input type="hidden" name="date" th:value="${prevMonth}">
+                        <button type="submit">🠜</button>
+                    </form>
+                    <span th:text="${curDate}" style="font-weight: bold; font-size: 1.5em;">Текущий месяц</span>
+                    <form th:action="@{/profile/analytics/plans}" method="get">
+                        <input type="hidden" name="date" th:value="${nextMonth}">
+                        <button type="submit">🠞</button>
+                    </form>
+                </div>
+
+                <input type="hidden" id="plannedExpSum" th:value="${totalExp}">
+                <input type="hidden" id="plannedIncSum" th:value="${totalInc}">
+                <input type="hidden" id="totalTransExp" th:value="${totalTransExp}">
+                <input type="hidden" id="totalTransInc" th:value="${totalTransInc}">
+                <!-- График с данными -->
+                <div class="chart">
+                    <div th:if="${totalInc} == 0 and ${totalExp} == 0">
+                        <p  style="text-align: center; padding: 20px; font-weight: bold; font-size: 1.5em;">
+                            Добавьте запланированные траты или доходы для отображения графика</p>
+                    </div>
+                    <div th:if="${totalInc} != 0 or ${totalExp} != 0">
+                        <canvas id="myChart" width="700" height="340"></canvas>
+                    </div>
+                </div>
+
+                <!-- Информация -->
+                <div class="info-row">
+                    <label for="end-of-month">Свободно на конец месяца:</label>
+                    <span id="end-of-month" th:text="${freeSum}">10000 ₽</span>
+                </div>
+                <div class="info-row">
+                    <label for="fact-end-of-month">Фактический остаток:</label>
+                    <span id="fact-end-of-month" th:text="${factFreeSum}">5000 Р</span>
+                </div>
+                <!-- Кнопки -->
+                <div class="button-group">
+                    <button onclick="toggleForm('income-form')">Создать план дохода</button>
+                    <button onclick="toggleForm('expense-form')">Создать план расхода</button>
+                </div>
+                <!-- Форма для создания плана дохода -->
+                <div id="income-form" class="form-container">
+                    <h3>Добавить план дохода</h3>
+                    <form th:action="@{/profile/analytics/plans/addInc}" method="post">
+                        <input type="hidden" name="planDate" th:value="${curDate}">
+                        <label for="income-source">Источник дохода:</label>
+                        <select id="income-source" name="incomeSource">
+                            <option th:each="source : ${incomeSources}" th:value="${source.id}" th:text="${source.sourceName}">Источник</option>
+                        </select>
+                        <label for="income-amount">Сумма:</label>
+                        <input type="number" id="income-amount" name="amount" step="0.01" min="0" />
+                        <div class="button-group">
+                            <button type="submit">Сохранить</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- Форма для создания плана расхода -->
+                <div id="expense-form" class="form-container">
+                    <h3>Добавить план расхода</h3>
+                    <form th:action="@{/profile/analytics/plans/addExp}" method="post">
+                        <input type="hidden" name="planDate" th:value="${curDate}">
+                        <label for="expense-category">Категория расхода:</label>
+                        <select id="expense-category" name="expenseCategory">
+                            <option th:each="category : ${expenseCategories}" th:value="${category.id}" th:text="${category.categoryName}">Категория</option>
+                        </select>
+                        <label for="expense-amount">Сумма:</label>
+                        <input type="number" id="expense-amount" name="amount" step="0.01" min="0" />
+                        <div class="button-group">
+                            <button type="submit">Сохранить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="content-column-scrollbox">
+                <div class="info-row">
+                    <label for="total-expense">Траты за данный месяц:</label>
+                    <span id="total-expense" th:text="${totalExp}">10000 ₽</span>
+                </div>
+                <div class="scroll-box">
+                    <div class="plan-container" th:each="plan : ${plannedExpList}">
+                        <div class="plan-details">
+                            <div class="title">
+                                Категория:
+                                <span th:text="${plan.expenseCategory.categoryName}">Имя категории</span>
+                            </div>
+                            <div class="value">
+                                <span th:text="'Сумма: ' + (${categoryTransSum[plan.expenseCategory.id] != null ? categoryTransSum[plan.expenseCategory.id] : '0'}) + ' из ' + ${plan.amount}"></span>
+                            </div>
+                            <div class="button-group-del-edit">
+                                <form th:action="@{/profile/analytics/plans/deleteExp}" th:method="delete">
+                                    <input type="hidden" name="id" th:value="${plan.id}">
+                                    <input type="hidden" name="planDate" th:value="${curDate}">
+                                    <button type="submit" class="delete-button">Удалить</button>
+                                </form>
+                                <button type="button" onclick="toggleEditForm(this)" class="edit-button">Изменить</button>
+                            </div>
+                        </div>
+                        <form class="edit-form" style="display: none;"  th:action="@{/profile/analytics/plans/editExp}" th:method="patch">
+                            <input type="hidden" name="id" th:value="${plan.id}" />
+                            <input type="hidden" name="expenseCategory.id" th:value="${plan.expenseCategory.id}" />
+                            <input type="hidden" name="planDate" th:value="${curDate}">
+                            <span th:text="${plan.expenseCategory.categoryName}">Имя категории</span>
+                            <label for="edit-amount-exp">Сумма:</label>
+                            <input type="number" id="edit-amount-exp" name="amount" th:value="${plan.amount}" step="0.01" min="0" />
+                            <div class="button-group-del-edit">
+                                <button type="submit">Сохранить</button>
+                                <button type="button" onclick="toggleEditForm(this)" class="cancel-button">Отмена</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="content-column-scrollbox" >
+                <div class="info-row">
+                    <label for="total-income">Доход за данный месяц:</label>
+                    <span id="total-income" th:text="${totalInc}">10000 ₽</span>
+                </div>
+                <div class="scroll-box">
+                    <div class="plan-container" th:each="plan : ${plannedIncList}">
+                        <div class="plan-details">
+                            <div class="title">
+                                Категория:
+                                <span th:text="${plan.incomeSource.sourceName}">Имя источника</span>
+                            </div>
+                            <div class="value">
+                                <span th:text="'Сумма: ' + (${sourceTransSum[plan.incomeSource.id] != null ? sourceTransSum[plan.incomeSource.id] : '0'}) + ' из ' + ${plan.amount}"></span>
+                            </div>
+                            <div class="button-group-del-edit">
+                                <!-- Кнопка удаления -->
+                                <form th:action="@{/profile/analytics/plans/deleteInc}" th:method="delete">
+                                    <input type="hidden" name="id" th:value="${plan.id}">
+                                    <input type="hidden" name="planDate" th:value="${curDate}">
+                                    <button type="submit" class="delete-button">Удалить</button>
+                                </form>
+                                <!-- Кнопка редактирования -->
+                                <button type="button" onclick="toggleEditForm(this)" class="edit-button">Изменить</button>
+                            </div>
+                        </div>
+                        <!-- Форма редактирования -->
+                        <form class="edit-form" style="display: none;" th:action="@{/profile/analytics/plans/editInc}" th:method="patch">
+                            <input type="hidden" name="id" th:value="${plan.id}" />
+                            <input type="hidden" name="incomeSource.id" th:value="${plan.incomeSource.id}" />
+                            <input type="hidden" name="planDate" th:value="${curDate}">
+                            <span th:text="${plan.incomeSource.sourceName}">Имя источника</span>
+                            <label for="edit-amount-inc">Сумма:</label>
+                            <input type="number" id="edit-amount-inc" name="amount" th:value="${plan.amount}" step="0.01" min="0" />
+                            <div class="button-group-del-edit">
+                                <button type="submit">Сохранить</button>
+                                <button type="button" onclick="toggleEditForm(this)" class="cancel-button">Отмена</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function toggleEditForm(button) {
+        const planContainer = button.closest('.plan-container');
+        const planDetails = planContainer.querySelector('.plan-details');
+        const formContainer = planContainer.querySelector('.edit-form');
+
+        const isVisible = formContainer.style.display === 'block';
+        formContainer.style.display = isVisible ? 'none' : 'block';
+
+        planDetails.style.display = isVisible ? 'block' : 'none';
+    }
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Получение значений из скрытых полей
+        const plannedExpSum = parseFloat(document.getElementById('plannedExpSum').value) || 0;
+        const plannedIncSum = parseFloat(document.getElementById('plannedIncSum').value) || 0;
+        const totalTransExp = parseFloat(document.getElementById('totalTransExp').value) || 0;
+        const totalTransInc = parseFloat(document.getElementById('totalTransInc').value) || 0;
+
+        // Создание графика
+        const ctx = document.getElementById('myChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['План дохода', 'План трат', 'Факт. доход', 'Факт. траты'],
+                datasets: [{
+                    label: 'Сумма',
+                    data: [plannedIncSum, plannedExpSum, totalTransInc, totalTransExp],
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.8)',
+                        'rgba(153, 102, 255, 0.8)',
+                        'rgba(255, 159, 64, 0.8)',
+                        'rgba(54, 162, 235, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(54, 162, 235, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Сумма (в единицах)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Категории'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return tooltipItem.dataset.label + ': ' + tooltipItem.raw;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>

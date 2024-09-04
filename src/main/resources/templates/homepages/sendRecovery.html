@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Восстановление пароля</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4; /* Светлый серый фон для всей страницы */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #fff; /* Белый фон контейнера */
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 350px;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 30px;
+            font-size: 28px;
+            color: #333; /* Темно-серый цвет для заголовка */
+        }
+        input {
+            width: calc(100% - 22px);
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #ccc; /* Светло-серый цвет границы */
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+            background-color: #f9f9f9; /* Очень светлый серый цвет для полей ввода */
+        }
+        input.error {
+            border-color: #e74c3c; /* Красный цвет для ошибок */
+        }
+        .error-message {
+            color: #e74c3c; /* Красный цвет для сообщений об ошибках */
+            font-size: 14px;
+            text-align: left;
+            margin: 5px 0;
+        }
+        button {
+            background-color: #333; /* Черный цвет для кнопок */
+            color: #fff; /* Белый текст на кнопках */
+            border: none;
+            padding: 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #555; /* Темно-серый цвет при наведении */
+        }
+        .footer {
+            margin-top: 20px;
+        }
+        .footer a {
+            font-size: 16px;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Стили для модального окна */
+        .modal {
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4); /* Темный фон с прозрачностью */
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Восстановление пароля</h1>
+    <form th:action="@{/send-recovery}" th:method="post">
+        <div>
+            <input type="email" name="recoveryEmail" placeholder="Введите вашу электронную почту" required>
+            <div class="error-message" th:if="${emailError}" th:text="${emailError}"></div>
+        </div>
+        <button type="submit">Отправить</button>
+    </form>
+    <div class="footer">
+        <p>Вспомнили пароль? <a href="/login">Войти</a></p>
+    </div>
+</div>
+
+<!-- Модальное окно -->
+<div id="myModal" class="modal" th:if="${accept}">
+    <div class="modal-content">
+        <p>Ваш запрос на восстановление пароля был отправлен на почту.</p>
+    </div>
+</div>
+</body>
+</html>

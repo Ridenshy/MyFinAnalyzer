@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4; /* Светлый серый фон для всей страницы */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #fff; /* Белый фон контейнера */
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 350px;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 30px;
+            font-size: 28px;
+            color: #333; /* Темно-серый цвет для заголовка */
+        }
+        input {
+            width: calc(100% - 22px);
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #ccc; /* Светло-серый цвет границы */
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+            background-color: #f9f9f9; /* Очень светлый серый цвет для полей ввода */
+        }
+        input.error {
+            border-color: #e74c3c; /* Красный цвет для ошибок */
+        }
+        .error-message {
+            color: #e74c3c; /* Красный цвет для сообщений об ошибках */
+            font-size: 14px;
+            text-align: left;
+            margin: 5px 0;
+        }
+        button {
+            background-color: #333; /* Черный цвет для кнопок */
+            color: #fff; /* Белый текст на кнопках */
+            border: none;
+            padding: 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #555; /* Темно-серый цвет при наведении */
+        }
+        .footer {
+            margin-top: 20px;
+        }
+        .footer a {
+            font-size: 16px;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Регистрация</h1>
+    <form th:action="@{/register}" th:method="post" th:object="${user}">
+        <div>
+            <input type="text" name="login" placeholder="Логин" th:field="*{login}" required>
+            <div class="error-message" th:if="${#fields.hasErrors('login')}" th:errors="*{login}">
+            </div>
+        </div>
+        <div>
+            <input type="email" name="email" placeholder="Электронная почта" th:field="*{email}" required>
+            <div class="error-message" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">
+            </div>
+        </div>
+        <div>
+            <input type="password" name="password" placeholder="Пароль" th:field="*{password}" required>
+            <div class="error-message" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">
+            </div>
+        </div>
+        <div>
+            <input type="password" name="checkPass" placeholder="Подтвердите пароль" th:field="*{checkPass}" required>
+            <div class="error-message" th:if="${#fields.hasErrors('checkPass')}" th:errors="*{checkPass}">
+            </div>
+        </div>
+        <button type="submit">Зарегистрироваться</button>
+    </form>
+    <div class="footer">
+        <p>Уже есть аккаунт? <a href="/login">Войти</a></p>
+    </div>
+
+</div>
+</body>
+</html>

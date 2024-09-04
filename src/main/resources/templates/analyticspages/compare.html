@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аналитика</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .navbar {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .navbar button {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            cursor: pointer;
+            font-size: 18px;
+            text-align: center;
+            border-radius: 5px;
+        }
+
+        .navbar button:hover {
+            background-color: #555;
+        }
+
+        .container {
+            display: flex;
+            margin-top: 60px;
+            height: calc(100vh - 60px);
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #f4f4f4;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 60px;
+            bottom: 0;
+            z-index: 500;
+        }
+
+        .sidebar button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            background-color: #ddd;
+            text-align: center;
+            cursor: pointer;
+            font-size: 18px;
+            border-radius: 5px;
+        }
+
+        .sidebar button:hover {
+            background-color: #ccc;
+        }
+
+        .content {
+            margin-left: 270px;
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .content-container {
+            width: 97%;
+            height: 99%;
+            background-color: #ddd;
+            border-radius: 5px;
+            display: flex;
+        }
+        .content-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .month-selector {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .month-selector label {
+            font-size: 18px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .month-selector input {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 40%;
+        }
+
+        .chart-container {
+            width: 90%;
+            height: 60%;
+            background-color: white;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .info-container {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 18px;
+            width: 50%;
+        }
+
+        .scroll-box {
+            background-color: white;
+            padding: 10px;
+            height: 350px;
+            overflow-y: auto;
+            border-radius: 5px;
+            width: 80%;
+        }
+
+        .scroll-box-item {
+            display: flex;
+            justify-content: space-between; /* Разместить текст и сумму по краям */
+            padding: 5px 0; /* Вертикальные отступы для элементов */
+            border-bottom: 1px solid #ddd; /* Линия между элементами */
+        }
+
+        .scroll-box-label {
+            font-weight: bold; /* Жирный шрифт */
+            font-size: 20px; /* Размер шрифта 18px */
+            width: 82%;
+        }
+
+        .scroll-box-value {
+            text-align: left;
+            font-size: 18px; /* Размер шрифта для суммы */
+            color: #555; /* Цвет шрифта для суммы */
+            width: 120%;
+        }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <button onclick="location.href='/profile'">Профиль</button>
+    <button onclick="location.href='/profile/holders'">Счета</button>
+    <button onclick="location.href='/profile/operations'">Операции</button>
+    <button onclick="location.href='/profile/analytics'">Аналитика</button>
+</div>
+
+<div class="container">
+    <div class="sidebar">
+            <button onclick="location.href='/profile/analytics/plans'">Планы</button>
+            <button onclick="location.href='/profile/analytics/compare'">Сравнение периодов</button>
+            <button onclick="location.href='/profile/analytics/categoryChart?expOrInc=EXP'">Расходы по категориям</button>
+            <button onclick="location.href='/profile/analytics/categoryChart?expOrInc=INC'">Доходы по категориям</button>
+            <button onclick="location.href='/profile/analytics/yearTrend'">Тренд расходов</button>
+            <button onclick="location.href='/profile/analytics/balanceDynamic'">Динамика баланса</button>
+    </div>
+    <div class="content">
+        <div class="content-container">
+            <div class="content-column">
+                <form id="dateForm" th:method="get" th:action="@{/profile/analytics/compare}">
+                    <div class="month-selector">
+                        <div>
+                            <label for="firstMonth">Первый месяц:</label>
+                            <input type="month" id="firstMonth" name="firstDate" th:value="${firstDate}" onchange="checkAndSubmit()" />
+                            <div id="firstMonthTotal" class="total-info">
+                                <label>Сумма:</label>
+                                <span th:text="${firstDateTotal}">Сумма</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="secondMonth">Второй месяц:</label>
+                            <input type="month" id="secondMonth" name="secondDate" th:value="${secondDate}" onchange="checkAndSubmit()" />
+                            <div id="secondMonthTotal" class="total-info">
+                                <label>Сумма:</label>
+                                <span th:text="${secondDateTotal}">Сумма</span>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <input type="hidden" id="firstDateTotalChart" th:value="${firstDateTotal}">
+                <input type="hidden" id="secondDateTotalChart" th:value="${secondDateTotal}">
+                <div class="chart-container">
+                    <canvas id="myChart" width="130%" height="100%"></canvas>
+                </div>
+
+                <div class="info-container">
+                    <span th:switch="${totalDifference}">
+                        <span th:case="0">Расходы остались равными.</span>
+                        <span th:case="*">
+                            <!-- Мы используем "*", чтобы отобразить любое другое значение -->
+                            <span th:if="${totalDifference > 0}">
+                                Общий расход в этом месяце ниже на <span th:text="${totalDifference}"></span>
+                            </span>
+                            <span th:if="${totalDifference < 0}">
+                                Общий расход в этом месяце выше на <span th:text="${-totalDifference}"></span>
+                            </span>
+                        </span>
+                    </span>
+                </div>
+            </div>
+            <div class="content-column">
+                <label class="scroll-box-label" for="up-scroll-box">Выросли</label>
+                <div id="up-scroll-box" class="scroll-box">
+                    <div th:each="entry : ${categoryDifference.entrySet()}">
+                        <div th:if="${entry.value > 0}" class="scroll-box-item">
+                            <span class="scroll-box-label" >Категория:</span>
+                            <span class="scroll-box-value" th:text="${expenseCategories[entry.key - 1].categoryName}">Категория </span>
+                            <span class="scroll-box-value" th:text="${entry.value}">Сумма</span>
+                        </div>
+                    </div>
+                </div>
+
+                <label class="scroll-box-label" for="down-scroll-box" >Снизились</label>
+                <div id="down-scroll-box" class="scroll-box">
+                    <div th:each="entry : ${categoryDifference.entrySet()}">
+                        <div th:if="${entry.value < 0}" class="scroll-box-item">
+                            <span class="scroll-box-label" >Категория</span>
+                            <span class="scroll-box-value" th:text="${expenseCategories[entry.key - 1].categoryName}">Категория </span>
+                            <span class="scroll-box-value" th:text="${entry.value}">Сумма</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function checkAndSubmit() {
+        const firstMonth = document.getElementById('firstMonth').value;
+        const secondMonth = document.getElementById('secondMonth').value;
+
+        // Проверяем, что обе даты выбраны
+        if (firstMonth && secondMonth) {
+            document.getElementById('dateForm').submit(); // Отправляем форму
+        }
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const firstDateTotal = parseFloat(document.getElementById('firstDateTotalChart').value) || 0;
+        const secondDateTotal = parseFloat(document.getElementById('secondDateTotalChart').value) || 0;
+
+        // Создаем контекст для графика
+        var ctx = document.getElementById('myChart').getContext('2d');
+
+        // Создаем график
+        var myChart = new Chart(ctx, {
+            type: 'bar', // Тип графика: столбчатый
+            data: {
+                labels: ['Первый месяц', 'Второй месяц'], // Подписи на осях
+                datasets: [{
+                    label: 'Сумма', // Подпись набора данных
+                    data: [firstDateTotal, secondDateTotal], // Данные для графика
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.8)', // Цвет для первого столбца
+                        'rgba(153, 102, 255, 0.8)'  // Цвет для второго столбца
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)', // Цвет границы первого столбца
+                        'rgba(153, 102, 255, 1)'  // Цвет границы второго столбца
+                    ],
+                    borderWidth: 1 // Толщина границы столбцов
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true // Начинаем шкалу Y с нуля
+                    }
+                }
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

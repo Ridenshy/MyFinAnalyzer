@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device=width, initial-scale=1.0">
+    <title>Профиль</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .navbar button {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            cursor: pointer;
+            font-size: 18px;
+            text-align: center;
+            border-radius: 5px;
+        }
+
+        .navbar button:hover {
+            background-color: #555;
+        }
+
+        .profile-container {
+            max-width: 600px;
+            margin: 100px auto 20px;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-info {
+            margin-bottom: 30px;
+        }
+
+        .profile-info h1 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .profile-info p {
+            font-size: 18px;
+            color: #555;
+            margin: 10px 0;
+        }
+
+        .profile-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px; /* Отступы между кнопками */
+            margin-bottom: 20px;
+        }
+
+        .profile-actions button {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 12px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            white-space: nowrap; /* Для предотвращения переноса текста */
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        .profile-actions button:hover {
+            background-color: #555;
+        }
+
+        .form-container {
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        .form-container input {
+            width: calc(100% - 22px);
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f9f9f9;
+        }
+
+        .form-container button[type="submit"] {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 18px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .form-container button[type="submit"]:hover {
+            background-color: #555;
+        }
+
+        .button-cancel {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 18px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .logout-button {
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 18px;
+            width: 100%;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .logout-button:hover {
+            background-color: #c82333;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+    </style>
+    <script>
+        function showForm(formId) {
+            // Скрыть все формы
+            const forms = document.querySelectorAll('.form-container');
+            forms.forEach(form => form.style.display = 'none');
+
+            // Показать выбранную форму
+            document.getElementById(formId).style.display = 'block';
+        }
+    </script>
+</head>
+<body>
+<div class="navbar">
+    <button onclick="location.href='/profile'">Профиль</button>
+    <button onclick="location.href='/profile/holders'">Счета</button>
+    <button onclick="location.href='/profile/operations'">Операции</button>
+    <button onclick="location.href='/profile/analytics'">Аналитика</button>
+</div>
+<div class="profile-container">
+    <div class="profile-info">
+        <h1>Профиль</h1>
+        <p><strong>Логин:</strong> <span th:text="${user.login}">userLogin</span></p>
+        <p><strong>Почта:</strong> <span th:text="${user.email}">userEmail</span></p>
+        <p><strong>Дата создания:</strong> <span th:text="${user.createDate}">createDate</span></p>
+    </div>
+
+    <div>
+        <div class="profile-actions">
+            <button onclick="showForm('login-form')">Изменить Логин</button>
+            <button onclick="showForm('email-form')">Изменить Почту</button>
+            <button onclick="showForm('password-form')">Изменить Пароль</button>
+        </div>
+
+        <div id="login-form" class="form-container">
+            <form th:action="@{/profile/edit-login}" th:method="patch">
+                <input type="text" name="login" placeholder="Новый Логин" required/>
+                <div th:if="${loginError}" class="error-message" th:text="${loginError}"></div>
+                <div class="profile-actions">
+                    <button type="submit">Сохранить</button>
+                    <button class="button-cancel" type="button" onclick="hideForm()">Отмена</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="email-form" class="form-container">
+            <form th:action="@{/profile/edit-email}" th:method="patch">
+                <input type="text" name="email" placeholder="Новая Почта" required/>
+                <div th:if="${emailError}" class="error-message" th:text="${emailError}"></div>
+                <div class="profile-actions">
+                    <button type="submit">Сохранить</button>
+                    <button class="button-cancel" type="button" onclick="hideForm()">Отмена</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="password-form" class="form-container">
+            <form th:action="@{/profile/edit-password}" th:method="patch">
+                <input type="password" name="oldPass" placeholder="Старый пароль" required/>
+                <input type="password" name="password" placeholder="Новый Пароль" required/>
+                <input type="password" name="checkPass" placeholder="Подтвердите пароль" required>
+                <div th:if="${passwordError}" class="error-message" th:text="${passwordError}"></div>
+                <div class="profile-actions">
+                    <button type="submit">Сохранить</button>
+                    <button class="button-cancel" type="button" onclick="hideForm()">Отмена</button>
+                </div>
+            </form>
+        </div>
+
+        <button onclick="location.href='/logout'" class="button-cancel">Выйти</button>
+        <button onclick="showForm('delete-form')" class="logout-button">Удалить аккаунт</button>
+        <div id="delete-form" class="form-container">
+            <form th:action="@{/profile/deleteAccount}" th:method="delete">
+                <input type="hidden" name="deleteId" th:value="${user.id}"/>
+                <input id="passCheckInput" type="password" name="pass" placeholder="Подтвердите пароль"/>
+                <div th:if="${deleteError}" th:text="${deleteError}" class="error-message"></div>
+                <button type="submit">Подтвердить</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    function showForm(formId) {
+        // Скрыть все формы
+        const forms = document.querySelectorAll('.form-container');
+        forms.forEach(form => form.style.display = 'none');
+
+        // Показать выбранную форму
+        document.getElementById(formId).style.display = 'block';
+    }
+
+    function hideForm() {
+        // Скрыть все формы
+        const forms = document.querySelectorAll('.form-container');
+        forms.forEach(form => form.style.display = 'none');
+    }
+</script>
+
+</body>
+</html>

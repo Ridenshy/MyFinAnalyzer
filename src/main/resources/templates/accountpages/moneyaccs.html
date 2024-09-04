@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Финансовый профиль</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+       .navbar {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        .navbar button {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            cursor: pointer;
+            font-size: 18px;
+            text-align: center;
+            border-radius: 5px;
+        }
+        .navbar button:hover {
+            background-color: #555;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            width: 90%;
+            margin-top: 20px;
+        }
+
+        .account-section, .holder-add-section, .deposit-add-section {
+            width: 30%;
+            box-sizing: border-box;
+            padding-left: 20px;
+        }
+
+        .balance-display {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            width: 90%;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 100px;
+        }
+
+        .scroll-box {
+            height: 350px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #fff;
+        }
+
+        .account-item {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px; /* Расстояние между кнопками */
+        }
+
+        .delete-button {
+            background-color: #999; /* Красный для удаления */
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .delete-button:hover {
+            background-color: #c82333;
+            color: white;
+        }
+
+        .edit-btn {
+            background-color: #999; /* Синий для редактирования */
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .edit-btn:hover {
+            background-color: green;
+            color: white;
+        }
+
+        .save-btn {
+            background-color: #999;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .save-btn:hover {
+            background-color: #218838;
+            color: white;
+        }
+
+        .cancel-btn {
+            background-color: #999;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .cancel-btn:hover {
+            background-color: #c82333;
+            color: white;
+        }
+
+        .add-button {
+            background-color: #555;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            display: block;
+            width: 100%;
+            text-align: center;
+        }
+
+        .add-button:hover {
+            background-color: #333;
+        }
+
+        .balance-positive {
+            color: green;
+        }
+
+        .balance-negative {
+            color: red;
+        }
+
+        .title {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .label {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .value {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .show {
+            display: block;
+        }
+
+        .form-section {
+            margin-top: 20px;
+        }
+
+        .filter-container {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            order-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+       }
+
+         .filter-container label {
+             font-weight: bold;
+             margin-right: 5px;
+         }
+
+         .filter-container input,
+         .filter-container select {
+             width: calc(100% - 22px);
+             padding: 10px;
+             margin-bottom: 10px;
+             border: 1px solid #ccc;
+             border-radius: 5px;
+         }
+        .checkbox-container {
+    display: flex;
+    align-items: center; /* Выравнивание по центру по вертикали */
+}
+
+.checkbox-container label {
+    margin-right: 5px; /* Расстояние между текстом и checkbox */
+}
+
+.checkbox-container input[type="checkbox"] {
+    width: 20px; /* Задать фиксированную ширину */
+    height: 20px; /* Задать фиксированную высоту */
+}
+
+    </style>
+</head>
+<body>
+<!-- Навигационная панель -->
+<div class="navbar">
+    <button onclick="location.href='/profile'">Профиль</button>
+    <button onclick="location.href='/profile/holders'">Счета</button>
+    <button onclick="location.href='/profile/operations'">Операции</button>
+    <button onclick="location.href='/profile/analytics'">Аналитика</button>
+</div>
+
+<!-- Информация об общем балансе -->
+<div class="balance-display">
+    <span th:if="${totalBalance} != null" th:text="'Общий баланс: ' + ${totalBalance} + ' ₽'"
+          th:classappend="${totalBalance < 0} ? 'balance-negative' : 'balance-positive'">
+        Общий баланс: 0 ₽
+    </span>
+    <span th:if="${totalBalance} == null" text="Общий баласн 0 ₽"></span>
+</div>
+
+<!-- Основной контейнер -->
+<div class="container">
+    <!-- Левая секция (счета и накопления) -->
+    <div class="account-section">
+        <div class="scroll-box">
+            <h3>Счета</h3>
+            <!-- Здесь будут динамически добавляться карты счетов -->
+            <div th:each="holder : ${Holders}" class="account-item">
+                <div class="account-details">
+                    <div class="title">
+                        <span th:text="${holder.holderName}">Имя счета</span>
+                    </div>
+                    <div class="label">
+                        Тип счета:
+                        <span th:switch="${holder.class.simpleName}">
+                            <span th:case="'BankAccount'">Банковский счет</span>
+                            <span th:case="'CashAccount'">Наличные</span>
+                            <span th:case="*">Неизвестный тип</span>
+                        </span>
+                    </div>
+                    <div class="value">
+                        Сумма:
+                        <span th:text="${holder.amount}"
+                              th:classappend="${holder.amount < 0} ? 'balance-negative' : 'balance-positive'">
+                            50 000 ₽
+                        </span>
+                    </div>
+                    <div class="value" th:if="${holder.class.simpleName == 'BankAccount'}">
+                        Кредитный лимит:
+                        <span th:text="${holder.creditLimit}" style="color: red;">
+                        </span>
+                    </div>
+                </div>
+                <!-- Основной контейнер для кнопок удаления и редактирования -->
+                <div class="button-group">
+                    <form th:action="@{/profile/holders}" th:method="delete" style="margin: 0;">
+                        <input type="hidden" name="id" th:value="${holder.id}"/>
+                        <button type="submit" class="delete-button">Удалить</button>
+                    </form>
+                    <button type="button" class="edit-btn" onclick="toggleEditForm(this)">Изменить</button>
+                    <button type="button" class="edit-btn">
+                        <a style="color: white;" th:href="@{/profile/operations(holderId=${holder.id})}">Перейти к операциям</a>
+                    </button>
+                </div>
+
+                <!-- Форма редактирования -->
+                <div class="edit-container hidden">
+                    <form class="filter-container" th:action="@{/profile/holders}" th:method="patch" >
+                        <!-- Скрытое поле для ID -->
+                        <input type="hidden" name="id" th:value="${holder.id}"/>
+
+                        <!-- Скрытое поле для типа счета -->
+                        <input type="hidden" name="type" th:value="${holder.class.simpleName}"/>
+
+                        <!-- Поле для имени счета -->
+                        <div class="form-group">
+                            <label for="editHolderName">Имя счета:</label>
+                            <input type="text" id="editHolderName" name="holderName" th:value="${holder.holderName}" placeholder="Имя счета" required/>
+                        </div>
+
+                        <!-- Поле для суммы -->
+                        <div class="form-group">
+                            <label for="editAmount">Сумма:</label>
+                            <input type="number"  step="0.01"  id="editAmount" name="amount" th:value="${holder.amount}" placeholder="Сумма" required/>
+                        </div>
+
+                        <!-- Поле для кредитного лимита отображается только для банковских счетов -->
+                        <div class="form-group" th:if="${holder.class.simpleName == 'BankAccount'}">
+                            <label for="editCreditLimit">Кредитный лимит:</label>
+                            <input type="number"  step="0.01"  id="editCreditLimit" name="creditLimit" th:value="${holder.creditLimit}" placeholder="Кредитный лимит"/>
+                        </div>
+
+                        <!-- Кнопка для сохранения изменений -->
+                        <div class="form-group">
+                            <button type="submit" class="save-btn">Сохранить изменения</button>
+                            <button type="button" class="cancel-btn" onclick="toggleEditForm(this)">Отмена</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="scroll-box">
+            <h3>Накопления</h3>
+            <!-- Здесь будут динамически добавляться карты накоплений -->
+            <div th:each="deposit : ${Deposits}" class="account-item">
+                <div class="account-details">
+                    <div class="title">
+                        <span th:text="${deposit.holderName}">Накопление 1</span>
+                    </div>
+                    <div class="label">
+                        Тип счета:
+                        <span th:switch="${deposit.class.simpleName}">
+                    <span th:case="'DepositAccount'">Депозит</span>
+                    <span th:case="'SavingsAccount'">Накопительный счет</span>
+                    <span th:case="*">Неизвестный тип</span>
+                </span>
+                    </div>
+                    <div class="value">
+                        Сумма:
+                        <span th:text="${deposit.amount}"
+                              th:classappend="${deposit.amount < 0} ? 'balance-negative' : 'balance-positive'">
+                    20 000 ₽
+                        </span>
+                    </div>
+                    <div class="value"
+                         th:if="${deposit.class.simpleName == 'DepositAccount' and !deposit.capitalization or deposit.class.simpleName == 'SavingsAccount'}">
+                        Проценты:
+                        <span th:text="${deposit.nonCapitalizedInterest}"></span>
+                    </div>
+                    <div class="value">
+                        Дата следующего начисления:
+                        <span th:if="${deposit.nextInterestDate != null}" th:text="${deposit.nextInterestDate}"></span>
+                        <span th:if="${deposit.nextInterestDate == null}" style="color: red;">счет не активен</span>
+                    </div>
+                    <div class="button-group">
+                        <form th:action="@{/profile/holders}" th:method="delete" style="margin: 0;">
+                            <input type="hidden" name="id" th:value="${deposit.id}"/>
+                            <button type="submit" class="delete-button">Удалить</button>
+                        </form>
+                        <div th:if="${deposit.class.simpleName == 'SavingsAccount'}">
+                            <button type="button" class="delete-button" onclick="toggleSForm()">Снятие/Пополнение</button>
+                        </div>
+                    </div>
+                    <div th:if="${deposit.class.simpleName == 'SavingsAccount'}">
+                        <form id="savingsForm" class="filter-container hidden" th:action="@{/profile/holders/getMoney}" th:method="post">
+                            <input type="hidden" name="savingsAccountId" th:value="${deposit.id}"/>
+                            <div id="accountSelector">
+                                <label for="getterHolders">Счета:</label>
+                                <select id="getterHolders" name="holderGetterId" required>
+                                    <option th:each="moneyHolder : ${Holders}"
+                                            th:value="${moneyHolder.id}"
+                                            th:text="${moneyHolder.holderName}">Option</option>
+                                </select>
+                            </div>
+                            <input type="number" step="0.01"  name="amount" required />
+                            <div class="button-group">
+                                <button type="submit" class="delete-button" name="action" value="subs">Снять сумму</button>
+                                <button type="submit" class="delete-button" name="action" value="add">Пополнить</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleSForm(button) {
+    // Найти родительский элемент, содержащий форму
+    const formContainer = document.querySelector('#savingsForm');
+    if (formContainer) {
+        formContainer.classList.toggle('hidden');
+    }
+    }
+    </script>
+
+    <!-- Правая секция (добавление новых счетов) -->
+    <div class="holder-add-section">
+        <button class="add-button" id="show-form">Добавить счет</button>
+        <div id="form-section" class="form-section hidden">
+            <div>
+                <button id="show-bank-form" class="add-button">Добавить банковский счет</button>
+                <button id="show-cash-form" class="add-button">Добавить наличные</button>
+            </div>
+            <div id="bank-form-section" class="form-section hidden">
+                <form class="filter-container" id="add-bank-form" th:action="@{/profile/holders/bank}" th:method="post" th:object="${bankholder}">
+                    <div>
+                        <label for="bankHolderName" class="label">Имя счета:</label>
+                        <input type="text" id="bankHolderName" name="holderName" placeholder="Введите имя счета" required>
+                    </div>
+                    <div>
+                        <label for="bankAmount" class="label">Баланс:</label>
+                        <input type="number" step="0.01" id="bankAmount" name="amount" placeholder="Введите баланс" required>
+                    </div>
+                    <div>
+                        <label for="bankLimit" class="label">Кредитный лимит:</label>
+                        <input type="number" step="0.01" id="bankLimit" name="creditLimit" placeholder="Укажите лимит">
+                    </div>
+                    <button type="submit" class="add-button">Добавить банковский счет</button>
+                </form>
+            </div>
+            <div id="cash-form-section" class="form-section hidden">
+                <form class="filter-container" id="add-cash-form" th:action="@{/profile/holders/cash}" th:method="post" th:object="${cashholder}">
+                    <div>
+                        <label for="cashHolderName" class="label">Имя счета:</label>
+                        <input type="text" id="cashHolderName" name="holderName" placeholder="Введите имя счета" required>
+                    </div>
+                    <div>
+                        <label for="cashAmount" class="label">Баланс:</label>
+                        <input type="number" step="0.01"  id="cashAmount" name="amount" placeholder="Введите баланс" required>
+                    </div>
+                    <button type="submit" class="add-button">Добавить наличные</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Секция добавления депозитов и накоплений -->
+    <div class="deposit-add-section">
+        <button class="add-button" id="show-options">Добавить депозит или накопительный счет</button>
+
+        <!-- Кнопки для выбора типа счета -->
+        <div id="options-section" class="hidden">
+            <button class="add-button" id="show-deposit-form">Добавить депозит</button>
+            <button class="add-button" id="show-savings-form">Добавить накопительный счет</button>
+        </div>
+
+        <!-- Форма для добавления депозитного счета -->
+        <div id="deposit-form-section" class="form-section hidden">
+            <form class="filter-container" id="add-deposit-form" th:action="@{/profile/holders/deposit}" th:method="post">
+                <div>
+                    <label for="depositHolderName" class="label">Имя счета:</label>
+                    <input type="text" id="depositHolderName" name="holderName" placeholder="Введите имя счета" required>
+                </div>
+                <div>
+                    <label for="depositAmount" class="label">Баланс:</label>
+                    <input type="number"  step="0.01"  id="depositAmount" name="amount" placeholder="Введите баланс" required>
+                </div>
+                <div>
+                    <label for="depositOpenDate" class="label">Дата открытия:</label>
+                    <input type="date" id="depositOpenDate" name="openDate" required>
+                </div>
+                <div>
+                    <label for="depositTermMonths" class="label">Срок (месяцы):</label>
+                    <input type="number" id="depositTermMonths" name="termMonths" placeholder="Введите срок в месяцах" required>
+                </div>
+                <div>
+                    <label for="depositInterestRate" class="label">Процентная ставка (%):</label>
+                    <input type="number" step="0.01" id="depositInterestRate" name="interestRate" placeholder="Введите процентную ставку" required>
+                </div>
+                <div>
+                    <label for="depositInterestPeriod" class="label">Период начисления:</label>
+                    <select id="depositInterestPeriod" name="interestPeriod" required>
+                        <option value="MONTHLY">Ежемесячно</option>
+                        <option value="QUARTERLY">Каждые квартал</option>
+                        <option value="YEARLY">Каждый год</option>
+                        <option value="END_OF_TERM">В конце срока</option>
+                    </select>
+                </div>
+                <div class="checkbox-container">
+                    <label for="depositCapitalization">Капитализация:</label>
+                    <input type="checkbox" id="depositCapitalization" name="capitalization">
+                </div>
+                <div id="value">
+                    <select name="holder">
+                        <option th:each="holders : ${Holders}"
+                                th:value="${holders.id}"
+                                th:text="${holders.holderName}">Option</option>
+                    </select>
+                </div>
+                <div>
+                    <button type="submit" class="add-button">Добавить депозит</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Форма для добавления накопительного счета -->
+        <div id="savings-form-section" class="form-section hidden">
+            <form class="filter-container" id="add-savings-form" th:action="@{/profile/holders/savings}" th:method="post">
+                <div>
+                    <label for="savingsHolderName" class="label">Имя счета:</label>
+                    <input type="text" id="savingsHolderName" name="holderName" placeholder="Введите имя счета" required>
+                </div>
+                <div>
+                    <label for="savingsAmount" class="label">Баланс:</label>
+                    <input type="number"  step="0.01"  id="savingsAmount" name="amount" placeholder="Введите баланс" required>
+                </div>
+                <div>
+                    <label for="savingsOpenDate" class="label">День открытия:</label>
+                    <input type="number" id="savingsOpenDate" name="openDateDay" required>
+                </div>
+                <div>
+                    <label for="savingsInterestRate" class="label">Процентная ставка (%):</label>
+                    <input type="number" step="0.01" id="savingsInterestRate" name="interestRate" placeholder="Введите процентную ставку" required>
+                </div>
+                <div>
+                    <button type="submit" class="add-button">Добавить накопительный счет</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        document.getElementById('show-options').addEventListener('click', function() {
+            document.getElementById('options-section').classList.toggle('hidden');
+        });
+
+        document.getElementById('show-deposit-form').addEventListener('click', function() {
+            document.getElementById('deposit-form-section').classList.remove('hidden');
+            document.getElementById('savings-form-section').classList.add('hidden');
+        });
+
+        document.getElementById('show-savings-form').addEventListener('click', function() {
+            document.getElementById('savings-form-section').classList.remove('hidden');
+            document.getElementById('deposit-form-section').classList.add('hidden');
+        });
+    </script>
+
+    <script>
+        function toggleEditForm(button) {
+            var container = button.closest('.account-item');
+            var details = container.querySelector('.account-details');
+            var editContainer = container.querySelector('.edit-container');
+            var isEditing = !editContainer.classList.contains('hidden');
+
+            // Переключить видимость деталей и формы редактирования
+            if (isEditing) {
+                details.classList.remove('hidden');
+                editContainer.classList.add('hidden');
+            } else {
+                details.classList.add('hidden');
+                editContainer.classList.remove('hidden');
+            }
+
+            // Переключить видимость кнопок удаления и редактирования
+            var buttonGroup = container.querySelector('.button-group');
+            buttonGroup.classList.toggle('hidden');
+        }
+
+        document.getElementById('show-form').addEventListener('click', function() {
+            var formSection = document.getElementById('form-section');
+            formSection.classList.toggle('hidden');
+            formSection.classList.toggle('show');
+        });
+
+        document.getElementById('show-bank-form').addEventListener('click', function() {
+            document.getElementById('bank-form-section').classList.toggle('hidden');
+            document.getElementById('cash-form-section').classList.add('hidden');
+        });
+
+        document.getElementById('show-cash-form').addEventListener('click', function() {
+            document.getElementById('cash-form-section').classList.toggle('hidden');
+            document.getElementById('bank-form-section').classList.add('hidden');
+        });
+    </script>
+</div>
+</body>
+</html>

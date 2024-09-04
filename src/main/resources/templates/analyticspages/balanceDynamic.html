@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аналитика</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .navbar {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        .navbar button {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            cursor: pointer;
+            font-size: 18px;
+            text-align: center;
+            border-radius: 5px;
+        }
+        .navbar button:hover {
+            background-color: #555;
+        }
+        .container {
+            display: flex;
+            margin-top: 60px;
+            height: calc(100vh - 60px);
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #f4f4f4;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 60px;
+            bottom: 0;
+            z-index: 500;
+        }
+        .sidebar button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            background-color: #ddd;
+            text-align: center;
+            cursor: pointer;
+            font-size: 18px;
+            border-radius: 5px;
+        }
+        .sidebar button:hover {
+            background-color: #ccc;
+        }
+        .content {
+            margin-left: 270px;
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .content-container {
+            width: 97%;
+            height: 99%;
+            background-color: #ddd;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .content-container p {
+            font-size: 24px; /* Увеличенный размер шрифта */
+            color: #333; /* Темно-серый цвет текста для контраста с фоном */
+        }
+        .month-navigation {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .month-navigation form {
+            display: inline;
+            margin: 0 10px;
+        }
+        .month-navigation button {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 10px 5px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        .month-navigation button:hover {
+            background-color: #555;
+        }
+        .chart {
+            width: 95%;
+            height: 95%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="navbar">
+    <button onclick="location.href='/profile'">Профиль</button>
+    <button onclick="location.href='/profile/holders'">Счета</button>
+    <button onclick="location.href='/profile/operations'">Операции</button>
+    <button onclick="location.href='/profile/analytics'">Аналитика</button>
+</div>
+<div class="container">
+    <div class="sidebar">
+        <button onclick="location.href='/profile/analytics/plans'">Планы</button>
+        <button onclick="location.href='/profile/analytics/compare'">Сравнение периодов</button>
+        <button onclick="location.href='/profile/analytics/categoryChart?expOrInc=EXP'">Расходы по категориям</button>
+        <button onclick="location.href='/profile/analytics/categoryChart?expOrInc=INC'">Доходы по категориям</button>
+        <button onclick="location.href='/profile/analytics/yearTrend'">Тренд расходов</button>
+        <button onclick="location.href='/profile/analytics/balanceDynamic'">Динамика баланса</button>
+    </div>
+    <div class="content">
+        <div class="month-navigation">
+            <form th:action="@{/profile/analytics/balanceDynamic}" method="get">
+                <input type="hidden" name="date" th:value="${prevMonth}">
+                <button type="submit">🠜</button>
+            </form>
+            <span th:text="${curDate}" style="font-weight: bold; font-size: 1.5em;">Текущая дата</span>
+            <form th:action="@{/profile/analytics/balanceDynamic}" method="get">
+                <input type="hidden" name="date" th:value="${nextMonth}">
+                <button type="submit">🠞</button>
+            </form>
+        </div>
+        <div class="content-container">
+            <div class="chart">
+                <p th:if="${cumulativeAmount == null}">В этом месяце не было трат.</p>
+                <canvas th:if="${cumulativeAmount != null}" id="lineChart" width="1200" height="700"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+<script th:inline="javascript">
+    // Пример данных для проверки
+    var cumulativeAmount = /*[[${cumulativeAmount}]]*/ {};
+    var cumulativeIncomeAmount = /*[[${cumulativeIncomeAmount}]]*/ {};
+
+    var labels = Object.keys(cumulativeAmount);
+    var data = Object.values(cumulativeAmount);
+    var incomeData = Object.values(cumulativeIncomeAmount);
+
+    var displayData = [];
+    var lastValidValue = null;
+
+    for (var i = 0; i < labels.length; i++) {
+        if (data[i] !== -1) {
+            lastValidValue = data[i];
+            displayData.push(data[i]);
+        } else{
+            break;
+        }
+    }
+
+    var ctx = document.getElementById('lineChart').getContext('2d');
+    var lineChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Траты',
+                data: displayData,
+                fill: false,
+                borderColor: 'rgb(255,98,97)',
+                tension: 0.1,
+                pointRadius: 5, // Размер точек на графике
+                pointHoverRadius: 7, // Размер точек при наведении
+                pointBackgroundColor: 'rgb(255,98,97)' // Цвет точек
+            }, {
+                label: 'Доход',
+                data: incomeData,
+                fill: false,
+                borderColor: 'rgb(97,190,113)',
+                tension: 0.1,
+                pointRadius: 5, // Размер точек на графике
+                pointHoverRadius: 7, // Размер точек при наведении
+                pointBackgroundColor: 'rgb(97,190,113)' // Цвет точек
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                            return tooltipItem.dataset.label + ': ' + tooltipItem.raw.toLocaleString();
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Day of Month'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Cumulative Amount'
+                    },
+                    beginAtZero: true // Начинать с нуля на оси Y
+                }
+            }
+        }
+    });
+</script>
+
+
+</body>
+</html>
