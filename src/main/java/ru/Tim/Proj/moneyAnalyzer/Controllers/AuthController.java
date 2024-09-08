@@ -72,7 +72,7 @@ public class AuthController {
         user.setEnabled(false);
         accountDataService.createOrUpdateUser(user);
         holdersService.starterHolders(user);
-        verifiService.sendVerificationEmail(user);
+        verifiService.sendVerificationEmail(user, "verifi", "");
 
         return "redirect:/register/confirm-message";
     }

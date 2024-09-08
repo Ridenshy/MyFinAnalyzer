@@ -12,7 +12,13 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.Tim.Proj.moneyAnalyzer.Config.MyUserDetails;
 import ru.Tim.Proj.moneyAnalyzer.DataBaseServices.Other.AccountDataService;
+import ru.Tim.Proj.moneyAnalyzer.DataBaseServices.Other.VerifiService;
 import ru.Tim.Proj.moneyAnalyzer.Models.Other.User;
+import ru.Tim.Proj.moneyAnalyzer.Models.Tokens.ChangeEmailToken;
+import ru.Tim.Proj.moneyAnalyzer.Models.Tokens.EmailToken;
+import ru.Tim.Proj.moneyAnalyzer.Models.Tokens.VerifiToken;
+
+import java.time.LocalDateTime;
 
 @Controller
 @RequestMapping("/profile")
@@ -20,11 +26,15 @@ public class AccountController {
 
     private final AccountDataService accountDataService;
     private final PasswordEncoder passwordEncoder;
+    private final VerifiService verifiService;
 
     @Autowired
-    public AccountController(AccountDataService accountDataService, PasswordEncoder passwordEncoder) {
+    public AccountController(AccountDataService accountDataService,
+                             PasswordEncoder passwordEncoder,
+                             VerifiService verifiService) {
         this.accountDataService = accountDataService;
         this.passwordEncoder = passwordEncoder;
+        this.verifiService = verifiService;
     }
 
 
@@ -62,7 +72,7 @@ public class AccountController {
     public String userUpdateEmail(@RequestParam("email") String email,
                                   @AuthenticationPrincipal MyUserDetails userDetails,
                                   RedirectAttributes redirectAttributes){
-        if(email.length() <= 3 || email.length() >= 20){
+        if(email.length() <= 3 || email.length() >= 60){
             redirectAttributes.addFlashAttribute("emailError", "Неверный формат");
             return "redirect:/profile";
         }
@@ -72,11 +82,35 @@ public class AccountController {
         }
 
         User user = userDetails.getUser();
-        user.setEmail(email);
-        updateSecurityContext(user);
-        accountDataService.createOrUpdateUser(user);
+        verifiService.sendVerificationEmail(user, "emailChange", email);
 
-        return "redirect:/profile";
+        return "redirect:/profile/new-mail-send";
+    }
+
+    @GetMapping("/new-mail-send")
+    public String emailChangeMessage(){
+        return "accountpages/newmail";
+    }
+
+    @GetMapping("verification-mail")
+    public String confirmNewMail(@RequestParam("token") String token){
+         ChangeEmailToken verifiToken = (ChangeEmailToken) verifiService.getToken(token);
+
+        if(verifiToken == null){
+            return "redirect:/profile?message=invalidToken";
+        }
+
+        if(!LocalDateTime.now().isBefore(verifiToken.getExpiryDate())){
+            verifiService.deleteToken(verifiToken);
+            return "redirect:/profile?message=invalidToken";
+        }
+
+        User user = verifiToken.getUser();
+        user.setEmail(verifiToken.getEmail());
+        accountDataService.createOrUpdateUser(user);
+        verifiService.deleteToken(verifiToken);
+
+        return "redirect:/profile?message=accepted";
     }
 
     @PatchMapping("/edit-password")

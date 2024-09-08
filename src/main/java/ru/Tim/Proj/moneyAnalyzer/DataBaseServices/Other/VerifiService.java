@@ -9,6 +9,7 @@ import ru.Tim.Proj.moneyAnalyzer.Models.Other.User;
 import ru.Tim.Proj.moneyAnalyzer.Models.Tokens.EmailToken;
 import ru.Tim.Proj.moneyAnalyzer.Models.Tokens.RecoveryToken;
 import ru.Tim.Proj.moneyAnalyzer.Models.Tokens.VerifiToken;
+import ru.Tim.Proj.moneyAnalyzer.Models.Tokens.ChangeEmailToken;
 import ru.Tim.Proj.moneyAnalyzer.Repositoryes.Other.TokenRepository;
 
 import java.util.UUID;
@@ -28,21 +29,41 @@ public class VerifiService {
     }
 
     @Async
-    public void sendVerificationEmail(User user) {
+    public void sendVerificationEmail(User user, String type, String newEmail) {
         String token = UUID.randomUUID().toString();
-        VerifiToken verificationToken = new VerifiToken(token, user);
-        tokenRepository.save(verificationToken);
+        EmailToken newToken;
+        if(newEmail.isEmpty()){
+            newToken = new VerifiToken(token, user);
+        }else {
+            newToken = new ChangeEmailToken(token, user, newEmail);
+        }
+        tokenRepository.save(newToken);
 
-        String subject = "Account Verification";
-        String confirmationUrl = hostUrl + "/register/confirm?token=" + token;
-        String message = "Перейдите по ссылке для подтверждения аккаунта: " + confirmationUrl;
+        String subject = null;
+        String confirmationUrl;
+        String message = null;
+
+        if(type.equals("verifi")){
+            subject = "Account Verification";
+            confirmationUrl = hostUrl + "/register/confirm?token=" + token;
+            message = "Перейдите по ссылке для подтверждения аккаунта: " + confirmationUrl;
+        } else if(type.equals("emailChange")){
+            subject = "Email change";
+            confirmationUrl = hostUrl + "/profile/verification-mail?token=" + token;
+            message = "Перейдите по ссылке для подтверждения почты: " + confirmationUrl;
+        }
 
         SimpleMailMessage email = new SimpleMailMessage();
-        email.setTo(user.getEmail());
+        if(!newEmail.isEmpty()){
+            email.setTo(newEmail);
+        } else {
+            email.setTo(user.getEmail());
+        }
         email.setSubject(subject);
         email.setText(message);
         mailSender.send(email);
     }
+
 
     @Async
     public void sendRecoveryEmail(User user){
