@@ -70,13 +70,14 @@ public class SavingsAccount extends MoneyHolders {
             BigDecimal rate = interestRate.divide(BigDecimal.valueOf(36500), 8, RoundingMode.HALF_UP);
             nonCapitalizedInterest = nonCapitalizedInterest.add(balance.multiply(rate));
             nextInterestDate = nextInterestDate.plusDays(1);
-            dropDate = currentDate.with(currentDate.plusMonths(1));
+            dropDate = openDate.plusMonths(1);
         }
 
         if(!currentDate.isBefore(dropDate)){
             BigDecimal balance = getAmount();
             setAmount(balance.add(nonCapitalizedInterest));
             nonCapitalizedInterest = BigDecimal.ZERO;
+            setOpenDate(dropDate);
         }
     }
 

@@ -5,6 +5,8 @@ import jakarta.validation.constraints.*;
 import ru.Tim.Proj.moneyAnalyzer.Models.Category.ExpenseCategory;
 import ru.Tim.Proj.moneyAnalyzer.Models.Category.IncomeSource;
 import ru.Tim.Proj.moneyAnalyzer.Models.HolderModels.MoneyHolders;
+import ru.Tim.Proj.moneyAnalyzer.Models.Plan.PlannedExpense;
+import ru.Tim.Proj.moneyAnalyzer.Models.Plan.PlannedIncome;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -46,6 +48,12 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     List<ExpenseCategory> expenseCategories;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<PlannedExpense> plannedExpenses;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<PlannedIncome> plannedIncomes;
 
     @Column(name = "enabled")
     private boolean enabled = false;
@@ -92,6 +100,22 @@ public class User {
 
     public void setHolders(List<MoneyHolders> holders) {
         this.holders = holders;
+    }
+
+    public List<PlannedExpense> getPlannedExpenses() {
+        return plannedExpenses;
+    }
+
+    public void setPlannedExpenses(List<PlannedExpense> plannedExpenses) {
+        this.plannedExpenses = plannedExpenses;
+    }
+
+    public List<PlannedIncome> getPlannedIncomes() {
+        return plannedIncomes;
+    }
+
+    public void setPlannedIncomes(List<PlannedIncome> plannedIncomes) {
+        this.plannedIncomes = plannedIncomes;
     }
 
     public LocalDate getCreateDate() { return createDate;}

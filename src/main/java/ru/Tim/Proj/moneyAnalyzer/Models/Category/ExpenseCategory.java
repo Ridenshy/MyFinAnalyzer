@@ -16,7 +16,7 @@ public class ExpenseCategory {
     private Long id;
 
     @Size(min = 0, max = 30, message = "слишком длинное название")
-    @Column(name = "category_name", nullable = false, unique = true, length = 100)
+    @Column(name = "category_name", nullable = false, length = 100)
     private String categoryName;
 
     @OneToMany(mappedBy = "expenseCategory", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

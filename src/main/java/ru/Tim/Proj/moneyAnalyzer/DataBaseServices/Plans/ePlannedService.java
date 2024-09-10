@@ -1,18 +1,17 @@
 package ru.Tim.Proj.moneyAnalyzer.DataBaseServices.Plans;
 
 import ru.Tim.Proj.moneyAnalyzer.Models.Plan.PlannedExpense;
-import ru.Tim.Proj.moneyAnalyzer.Repositoryes.Plans.ePlanRepository;
+import ru.Tim.Proj.moneyAnalyzer.Repositoryes.Plans.EPlanRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.YearMonth;
 import java.util.List;
 
 @Service
 public class ePlannedService {
 
-    private final ePlanRepository ePlanRepository;
+    private final EPlanRepository ePlanRepository;
 
-    public ePlannedService(ru.Tim.Proj.moneyAnalyzer.Repositoryes.Plans.ePlanRepository ePlanRepository) {
+    public ePlannedService(EPlanRepository ePlanRepository) {
         this.ePlanRepository = ePlanRepository;
     }
 

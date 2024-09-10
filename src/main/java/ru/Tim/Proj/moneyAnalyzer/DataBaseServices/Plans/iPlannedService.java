@@ -1,18 +1,17 @@
 package ru.Tim.Proj.moneyAnalyzer.DataBaseServices.Plans;
 
 import ru.Tim.Proj.moneyAnalyzer.Models.Plan.PlannedIncome;
-import ru.Tim.Proj.moneyAnalyzer.Repositoryes.Plans.iPlanRepository;
+import ru.Tim.Proj.moneyAnalyzer.Repositoryes.Plans.IPlanRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.YearMonth;
 import java.util.List;
 
 @Service
 public class iPlannedService {
 
-    private final iPlanRepository iPlanRepository;
+    private final IPlanRepository iPlanRepository;
 
-    public iPlannedService(ru.Tim.Proj.moneyAnalyzer.Repositoryes.Plans.iPlanRepository iPlanRepository) {
+    public iPlannedService(IPlanRepository iPlanRepository) {
         this.iPlanRepository = iPlanRepository;
     }
 

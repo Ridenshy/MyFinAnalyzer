@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device=width, initial-scale=1.0">
@@ -69,7 +69,7 @@
         .profile-actions {
             display: flex;
             justify-content: space-between;
-            gap: 10px; /* Отступы между кнопками */
+            gap: 10px;
             margin-bottom: 20px;
         }
 
@@ -82,7 +82,7 @@
             cursor: pointer;
             font-size: 16px;
             transition: background-color 0.3s;
-            white-space: nowrap; /* Для предотвращения переноса текста */
+            white-space: nowrap;
             flex-grow: 1;
             text-align: center;
         }
@@ -242,6 +242,53 @@
         </div>
     </div>
 </div>
+<div class="profile-container" style="max-width: 600px; margin: 20px auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+    <h2>Импорт и Экспорт данных</h2>
+
+    <div class="profile-actions" id="import-form">
+        <form th:action="@{/profile/import-excel-user-data}" th:method="post" enctype="multipart/form-data">
+            <h3>Импорт данных</h3>
+                <input id="file-upload" type="file" name="file" accept=".xlsx, .xls" required/>
+                <div th:if="${message}" th:text="${message}" class="error-message"></div>
+                <div>
+                    Удалить старые данные перед загрузкой новых:<input type="checkbox" name="isDeleteOldData"/>
+                </div>
+            <button type="submit" class="file-input-button">Импортировать</button>
+        </form>
+    </div>
+
+    <div class="profile-actions" id="export-form">
+        <form th:action="@{/profile/export-excel-user-data}" method="get">
+            <h3>Экспорт данных</h3>
+            <button type="submit" class="file-input-button">Экспортировать данные</button>
+        </form>
+    </div>
+</div>
+<style>
+    #file-upload {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 10px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-bottom: 15px;
+        width: 150%;
+    }
+    #file-upload::-webkit-file-upload-button {
+        background: #333;
+        color: #fff;
+        border: none;
+        padding: 15px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 18px;
+    }
+
+    #file-upload::-webkit-file-upload-button:hover {
+        background-color: #555;
+    }
+</style>
 <script>
     function showForm(formId) {
         // Скрыть все формы

@@ -14,8 +14,8 @@ public class PlannedIncome {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "income_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "income_id")
     private IncomeSource incomeSource;
 
     @Column(nullable = false)
@@ -25,7 +25,7 @@ public class PlannedIncome {
     @JoinColumn(name = "acc_id", nullable = false)
     private User user;
 
-    @Column(name = "plan_date")
+    @Column(name = "plan_date", nullable = false)
     private String yearMonth;
 
     public PlannedIncome() {};

@@ -11,7 +11,7 @@ import ru.Tim.Proj.moneyAnalyzer.Models.Other.User;
 public class ChangeEmailToken extends EmailToken{
 
     @Email
-    @Column(name = "new_email", nullable = false)
+    @Column(name = "new_email")
     private String email;
 
     public ChangeEmailToken() {}

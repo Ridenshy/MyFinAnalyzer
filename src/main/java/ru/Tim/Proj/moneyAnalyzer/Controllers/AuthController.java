@@ -14,7 +14,6 @@ import ru.Tim.Proj.moneyAnalyzer.DataBaseServices.Other.HoldersService;
 import ru.Tim.Proj.moneyAnalyzer.DataBaseServices.Other.VerifiService;
 import ru.Tim.Proj.moneyAnalyzer.Models.Other.User;
 import ru.Tim.Proj.moneyAnalyzer.Models.Tokens.EmailToken;
-import ru.Tim.Proj.moneyAnalyzer.Models.Tokens.VerifiToken;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

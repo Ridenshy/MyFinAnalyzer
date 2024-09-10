@@ -235,7 +235,12 @@
                     <div th:each="entry : ${categoryDifference.entrySet()}">
                         <div th:if="${entry.value > 0}" class="scroll-box-item">
                             <span class="scroll-box-label" >Категория:</span>
-                            <span class="scroll-box-value" th:text="${expenseCategories[entry.key - 1].categoryName}">Категория </span>
+                            <span class="scroll-box-value"
+                                  th:each="category : ${expenseCategories}"
+                                  th:if="${category.id == entry.key}"
+                                  th:text="${category.categoryName}">
+                                    Категория
+                            </span>
                             <span class="scroll-box-value" th:text="${entry.value}">Сумма</span>
                         </div>
                     </div>
@@ -246,7 +251,12 @@
                     <div th:each="entry : ${categoryDifference.entrySet()}">
                         <div th:if="${entry.value < 0}" class="scroll-box-item">
                             <span class="scroll-box-label" >Категория</span>
-                            <span class="scroll-box-value" th:text="${expenseCategories[entry.key - 1].categoryName}">Категория </span>
+                            <span class="scroll-box-value"
+                                  th:each="category : ${expenseCategories}"
+                                  th:if="${category.id == entry.key}"
+                                  th:text="${category.categoryName}">
+                                    Категория
+                            </span>
                             <span class="scroll-box-value" th:text="${entry.value}">Сумма</span>
                         </div>
                     </div>

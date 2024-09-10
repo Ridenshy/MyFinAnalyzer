@@ -1,9 +1,12 @@
 package ru.Tim.Proj.moneyAnalyzer.Repositoryes.Other;
 
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.Tim.Proj.moneyAnalyzer.Models.Other.Transaction;
+import ru.Tim.Proj.moneyAnalyzer.Models.Other.User;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -70,5 +73,10 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             "GROUP BY EXTRACT(MONTH FROM t.transactionDate)")
     List<Object[]> getYearMonthAmounts(@Param("userId") Long id,
                                        @Param("date") String date);
+
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM Transaction t WHERE t.user = :user")
+    void deleteAllByUser(@Param("user") User user);
 }
 

@@ -4,7 +4,6 @@ package ru.Tim.Proj.moneyAnalyzer.Models.HolderModels;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import ru.Tim.Proj.moneyAnalyzer.Models.Other.Transaction;
 import ru.Tim.Proj.moneyAnalyzer.Models.Other.User;

@@ -1,6 +1,8 @@
 package ru.Tim.Proj.moneyAnalyzer.Repositoryes.Other;
 
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.Tim.Proj.moneyAnalyzer.Models.HolderModels.MoneyHolders;
@@ -24,4 +26,12 @@ public interface HolderRepository extends JpaRepository<MoneyHolders, Long> {
     BigDecimal getTotalBalance(@Param("userId") Long userId);
 
     List<MoneyHolders> findAllByUser(User user);
+
+    MoneyHolders findByHolderNameAndUser(String holderName, User user);
+
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM MoneyHolders h WHERE h.user = :user")
+    void deleteAllByUser(@Param("user") User user);
+
 }

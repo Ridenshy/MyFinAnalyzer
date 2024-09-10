@@ -5,9 +5,6 @@ import ru.Tim.Proj.moneyAnalyzer.Models.Category.ExpenseCategory;
 import ru.Tim.Proj.moneyAnalyzer.Models.Other.User;
 
 import java.math.BigDecimal;
-import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
-
 
 @Entity
 @Table(name = "planned_expenses")
@@ -16,8 +13,8 @@ public class PlannedExpense {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "expense_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "expense_id")
     private ExpenseCategory expenseCategory;
 
     @Column(nullable = false)

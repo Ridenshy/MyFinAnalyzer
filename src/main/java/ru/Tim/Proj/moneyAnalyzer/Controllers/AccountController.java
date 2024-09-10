@@ -15,8 +15,6 @@ import ru.Tim.Proj.moneyAnalyzer.DataBaseServices.Other.AccountDataService;
 import ru.Tim.Proj.moneyAnalyzer.DataBaseServices.Other.VerifiService;
 import ru.Tim.Proj.moneyAnalyzer.Models.Other.User;
 import ru.Tim.Proj.moneyAnalyzer.Models.Tokens.ChangeEmailToken;
-import ru.Tim.Proj.moneyAnalyzer.Models.Tokens.EmailToken;
-import ru.Tim.Proj.moneyAnalyzer.Models.Tokens.VerifiToken;
 
 import java.time.LocalDateTime;
 
@@ -92,7 +90,7 @@ public class AccountController {
         return "accountpages/newmail";
     }
 
-    @GetMapping("verification-mail")
+    @GetMapping("/verification-mail")
     public String confirmNewMail(@RequestParam("token") String token){
          ChangeEmailToken verifiToken = (ChangeEmailToken) verifiService.getToken(token);
 
