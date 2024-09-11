@@ -1,4 +1,4 @@
-package ru.Tim.Proj.moneyAnalyzer.DataBaseServices.Other;
+package ru.Tim.Proj.moneyAnalyzer.Services;
 
 
 import org.apache.poi.ss.usermodel.*;
@@ -107,15 +107,17 @@ public class ExcelService {
             } else if(holder instanceof SavingsAccount savings){
                 savings.setActiveCheck(true);
                 savings.setInterestRate(BigDecimal.valueOf(row.getCell(6).getNumericCellValue()));
-                savings.setOpenDate(LocalDate.parse(row.getCell(7).getStringCellValue()));
+                savings.setOpenDate(LocalDate
+                        .parse(row.getCell(7).getStringCellValue().replace("\"","")));
                 savings.setNextInterestDate(savings.getOpenDate());
                 savings.calcWhileNormalDate();
             } else if(holder instanceof DepositAccount deposit){
                 deposit.setActiveCheck(true);
-                deposit.setCapitalization(row.getCell(4).getBooleanCellValue());
+                deposit.setCapitalization(row.getCell(4).getStringCellValue().equals("+"));
                 deposit.setInterestPeriod(DepositAccount.InterestPeriod.valueOf(row.getCell(5).getStringCellValue().toUpperCase()));
                 deposit.setInterestRate(BigDecimal.valueOf(row.getCell(6).getNumericCellValue()));
-                deposit.setOpenDate(LocalDate.parse(row.getCell(7).getStringCellValue()));
+                deposit.setOpenDate(LocalDate
+                        .parse(row.getCell(7).getStringCellValue().replace("\"","")));
                 long term = (long) row.getCell(8).getNumericCellValue();
                 deposit.setTermMonths(term);
                 deposit.setNextInterestDate(deposit.calculateNextInterestDate(deposit.getOpenDate()));
@@ -161,7 +163,8 @@ public class ExcelService {
             Transaction transaction = new Transaction();
             transaction.setAmount(BigDecimal.valueOf(row.getCell(0).getNumericCellValue()));
             transaction.setTransComment(row.getCell(1).getStringCellValue());
-            transaction.setTransactionDate(LocalDate.parse(row.getCell(2).getStringCellValue()));
+            transaction.setTransactionDate(LocalDate
+                    .parse(row.getCell(2).getStringCellValue().replace("\"","")));
             transaction.setTypeOfTransfer(Transaction.TransferType
                     .valueOf(row.getCell(3).getStringCellValue().toUpperCase()));
             if(transaction.getTypeOfTransfer().toString().equals("INCOME")){
@@ -242,6 +245,17 @@ public class ExcelService {
         return style;
     }
 
+    private int createHeaderRow(Sheet sheet, int rowIndex, String[] headers, CellStyle headerStyle) {
+        Row headerRow = sheet.createRow(rowIndex++);
+        for (int i = 0; i < headers.length; i++) {
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(headers[i]);
+            cell.setCellStyle(headerStyle);
+            sheet.autoSizeColumn(i);
+        }
+        return rowIndex;
+    }
+
     public void createHoldersSheet(Sheet sheet, User user, Workbook workbook){
         List<MoneyHolders> holders = holderRepository.findAllByUser(user);
         int rowIndex = 0;
@@ -267,17 +281,17 @@ public class ExcelService {
                 row.createCell(3).setCellValue(bankAccount.getCreditLimit().doubleValue());
             }
             if(holder instanceof DepositAccount deposit){
-                row.createCell(4).setCellValue(deposit.isCapitalization());
+                row.createCell(4).setCellValue(deposit.isCapitalization() ? "+" : "-");
                 row.createCell(5).setCellValue(deposit.getInterestPeriod().toString());
                 row.createCell(8).setCellValue(deposit.getTermMonths());
                 row.createCell(9).setCellValue(deposit.getHolder().getHolderName());
 
                 row.createCell(6).setCellValue(deposit.getInterestRate().doubleValue());
-                row.createCell(7).setCellValue(deposit.getOpenDate().toString());
+                row.createCell(7).setCellValue("\"" + deposit.getOpenDate().toString() + "\"");
             }
             else if(holder instanceof SavingsAccount savings){
                 row.createCell(6).setCellValue(savings.getInterestRate().doubleValue());
-                row.createCell(7).setCellValue(savings.getOpenDate().toString());
+                row.createCell(7).setCellValue("\"" + savings.getOpenDate().toString() + "\"");
             }
 
             for (int i = 0; i < 10; i++) {
@@ -308,7 +322,7 @@ public class ExcelService {
             Row row = sheet.createRow(rowIndex++);
             row.createCell(0).setCellValue(transaction.getAmount().doubleValue());
             row.createCell(1).setCellValue(transaction.getTransComment());
-            row.createCell(2).setCellValue(transaction.getTransactionDate().toString());
+            row.createCell(2).setCellValue("\"" + transaction.getTransactionDate().toString() + "\"");
             row.createCell(3).setCellValue(transaction.getTypeOfTransfer().toString());
             if(transaction.getTypeOfTransfer().toString().equals("INCOME")){
                 row.createCell(5).setCellValue(transaction.getIncomeSource().getSourceName());
@@ -450,7 +464,7 @@ public class ExcelService {
         CellStyle headerStyle = createHeaderStyle(workbook);
         CellStyle cellStyle = createCellStyle(workbook);
 
-        rowIndex = createSectionHeader(sheet, rowIndex, "Пример заполнения таблицы счетов:");
+        rowIndex = createSectionHeader(sheet, rowIndex, "Пример заполнения таблицы счетов (копировать строку для добавления данных)");
 
         String[] headers = {
                 "Тип счета", "Название счета", "Сумма", "Кредитный лимит(если банк. счет)",
@@ -466,7 +480,7 @@ public class ExcelService {
             fillHoldersRow(row, accountType, cellStyle);
         }
 
-        rowIndex = createSectionHeader(sheet, rowIndex, "Пример заполнения транзакций:");
+        rowIndex = createSectionHeader(sheet, rowIndex, "Пример заполнения транзакций (копировать строку для добавления данных)");
         String[] transactionHeaders = {
                 "Сумма", "Комментарий", "Дата", "Тип операции", "Категория трат (если трата)",
                 "Источник дохода (если доход)", "Имя счета"
@@ -475,9 +489,15 @@ public class ExcelService {
 
         Row expenseRow = sheet.createRow(rowIndex++);
         fillTransactionRow(expenseRow, "EXPENSE",  cellStyle);
-
         Row incomeRow = sheet.createRow(rowIndex++);
         fillTransactionRow(incomeRow, "INCOME", cellStyle);
+
+        rowIndex = createSectionHeader(sheet, rowIndex, "Пример заполнения категорий и планов (копировать строку для добавления данных)");
+        String[] OtherHeaders = {"Название категории", "Тип категории", "|", "Сумма", "Год-месяц", "Категория"};
+        rowIndex = createHeaderRow(sheet, rowIndex, OtherHeaders, headerStyle);
+        Row otherRow = sheet.createRow(rowIndex);
+        fillOtherRow(otherRow, cellStyle);
+        for(int i = 0; i < 11; i++){sheet.autoSizeColumn(i);}
     }
 
     private int createSectionHeader(Sheet sheet, int rowIndex, String headerText) {
@@ -487,16 +507,6 @@ public class ExcelService {
         return rowIndex;
     }
 
-    private int createHeaderRow(Sheet sheet, int rowIndex, String[] headers, CellStyle headerStyle) {
-        Row headerRow = sheet.createRow(rowIndex++);
-        for (int i = 0; i < headers.length; i++) {
-            Cell cell = headerRow.createCell(i);
-            cell.setCellValue(headers[i]);
-            cell.setCellStyle(headerStyle);
-            sheet.autoSizeColumn(i);
-        }
-        return rowIndex;
-    }
 
     private void fillHoldersRow(Row row, String accountType, CellStyle cellStyle) {
         row.createCell(0).setCellValue(accountType);
@@ -506,20 +516,21 @@ public class ExcelService {
         for (int i = 1; i <= 9; i++) {
             Cell cell = row.createCell(i);
             cell.setCellStyle(cellStyle);
-
+            if (i < 3) cell.setCellValue("?");
             switch (accountType) {
                 case "CashAccount", "BankAccount" -> {
-                    if (i < 3) cell.setCellValue("?");
                     if ("BankAccount".equals(accountType) && i == 3) {
                         cell.setCellValue("?");
                     }
                 }
                 case "SavingsAccount" -> {
-                    if (i == 5 || i == 6) cell.setCellValue(i == 5 ? "?" : "yyyy-mm-dd");
+                    if (i == 6 || i == 7) cell.setCellValue(i == 6 ? "?" : "\"yyyy-mm-dd\"");
                 }
                 case "DepositAccount" -> {
-                    if (i == 4) cell.setCellValue("MONTHLY, QUARTERLY, YEARLY, END_OF_TERM");
-                    if (i > 6) cell.setCellValue("?");
+                    if (i == 4 || i == 5){
+                        cell.setCellValue(i == 4 ? "+/-" : "MONTHLY, QUARTERLY, YEARLY, END_OF_TERM");
+                    }
+                    if (i > 5) cell.setCellValue(i == 7 ? "\"yyyy-mm-dd\"": "?");
                 }
             }
         }
@@ -528,8 +539,8 @@ public class ExcelService {
     private void fillTransactionRow(Row row, String transactionType, CellStyle cellStyle) {
         String[] transactionData = new String[7];
         transactionData[0] = "?";
-        transactionData[1] = "Пример комментария";
-        transactionData[2] = "yyyy-mm-dd";
+        transactionData[1] = "Пример коммент.";
+        transactionData[2] = "\"yyyy-mm-dd\"";
         transactionData[3] = transactionType;
 
         if ("EXPENSE".equals(transactionType)) {
@@ -542,6 +553,18 @@ public class ExcelService {
             Cell cell = row.createCell(i);
             cell.setCellValue(transactionData[i] != null ? transactionData[i] : "");
             cell.setCellStyle(cellStyle);
+        }
+    }
+
+    private void fillOtherRow(Row row, CellStyle cellStyle){
+        row.createCell(0).setCellValue("Имя категории");
+        row.createCell(1).setCellValue("Пользовательский источник");
+        row.createCell(3).setCellValue("?");
+        row.createCell(4).setCellValue("\"yyyy-mm\"");
+        row.createCell(5).setCellValue("Имя катеогрии");
+        for (int i = 0; i < 6; i++) {
+            if(row.getCell(i) == null){ row.createCell(i); }
+            row.getCell(i).setCellStyle(cellStyle);
         }
     }
 }
