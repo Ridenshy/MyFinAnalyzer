@@ -46,7 +46,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Object[]> findTotalAmountsByCategory(@Param("userId") Long userId,
                                               @Param("yearMonth") String yearMonth);
 
-
     @Query("SELECT t.incomeSource.id, SUM(t.amount) " +
             "FROM Transaction t " +
             "WHERE t.user.id = :userId " +
@@ -56,6 +55,26 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Object[]> findTotalAmountsBySource(@Param("userId") Long userId,
                                             @Param("yearMonth") String yearMonth);
 
+    @Query("SELECT e.categoryName, SUM(t.amount) " +
+            "FROM Transaction t " +
+            "JOIN t.expenseCategory e " +
+            "WHERE t.user.id = :userId " +
+            "AND DATE_TRUNC('month', t.transactionDate) = TO_DATE(:yearMonth, 'YYYY-MM') " +
+            "AND t.typeOfTransfer = 'EXPENSE' " +
+            "GROUP BY e.categoryName")
+    List<Object[]> findTotalAmountsByCategoryNames(@Param("userId") Long userId,
+                                                   @Param("yearMonth") String yearMonth);
+
+    @Query("SELECT i.sourceName, SUM(t.amount) " +
+            "FROM Transaction t " +
+            "JOIN t.incomeSource i " +
+            "WHERE t.user.id = :userId " +
+            "AND DATE_TRUNC('month', t.transactionDate) = TO_DATE(:yearMonth, 'YYYY-MM') " +
+            "AND t.typeOfTransfer = 'INCOME' " +
+            "GROUP BY i.sourceName")
+    List<Object[]> findTotalAmountsBySourceNames(@Param("userId") Long userId,
+                                                 @Param("yearMonth") String yearMonth);
+
     @Query("SELECT EXTRACT(DAY FROM t.transactionDate) AS day, t.amount " +
             "FROM Transaction t WHERE t.user.id = :userId " +
             "AND DATE_TRUNC('month', t.transactionDate) = TO_DATE(:date, 'YYYY-MM') " +
@@ -63,6 +82,14 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Object[]> getMonthTransactionsExp(@Param("userId") Long id,
                                            @Param("date") String date,
                                            @Param("transType") Transaction.TransferType transferType);
+
+
+    @Query("SELECT EXTRACT(DAY FROM t.transactionDate) AS day, SUM(t.amount) " +
+            "FROM Transaction t WHERE t.user.id = :userId " +
+            "AND DATE_TRUNC('month', t.transactionDate) = TO_DATE(:date, 'YYYY-MM') " +
+            "AND t.typeOfTransfer = 'EXPENSE' GROUP BY EXTRACT(DAY FROM t.transactionDate)")
+    List<Object[]> getDaysOfMonthSum(@Param("userId") Long id,
+                                   @Param("date") String date);
 
 
     @Query("SELECT EXTRACT(MONTH FROM t.transactionDate) AS month, SUM(t.amount) " +

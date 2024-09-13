@@ -126,10 +126,25 @@ public class ExcelService {
             }
             holderRepository.save(holder);
         }
-        for(Map.Entry<String, DepositAccount> entry : depositAccountMap.entrySet()){
-            MoneyHolders holder = holderRepository.findByHolderNameAndUser(entry.getKey(), user);
+        for (Map.Entry<String, DepositAccount> entry : depositAccountMap.entrySet()) {
+            // Ищем существующего holder-а
+            MoneyHolders holder = holderRepository.findFirstByHolderNameAndUser(entry.getKey(), user);
+
+            // Если holder не найден, создаем новый BankAccount
+            if (holder == null) {
+                BankAccount newBankAccount = new BankAccount();
+                newBankAccount.setHolderName(entry.getKey());
+                newBankAccount.setAmount(BigDecimal.ZERO);
+                newBankAccount.setCreditLimit(BigDecimal.ZERO);
+                newBankAccount.setActiveCheck(true);
+                newBankAccount.setUser(user);
+
+                // Сохраняем новый BankAccount
+                holder = holderRepository.save(newBankAccount);
+            }
+
             entry.getValue().setHolder(holder);
-            holderRepository.save(entry.getValue());
+            holderRepository.save(entry.getValue());  // Сохраняем DepositAccount
         }
     }
 
@@ -175,7 +190,7 @@ public class ExcelService {
                         row.getCell(4).getStringCellValue(), user));
             }
             transaction.setMoneyHolders(holderRepository
-                    .findByHolderNameAndUser(row.getCell(6).getStringCellValue(), user));
+                    .findFirstByHolderNameAndUser(row.getCell(6).getStringCellValue(), user));
             transaction.setUser(user);
             transactionRepository.save(transaction);
         }

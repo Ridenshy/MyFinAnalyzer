@@ -27,7 +27,7 @@ public interface HolderRepository extends JpaRepository<MoneyHolders, Long> {
 
     List<MoneyHolders> findAllByUser(User user);
 
-    MoneyHolders findByHolderNameAndUser(String holderName, User user);
+    MoneyHolders findFirstByHolderNameAndUser(String holderName, User user);
 
     @Transactional
     @Modifying

@@ -67,10 +67,44 @@ public class TransactionService {
                 .collect(Collectors.toMap(result -> (Long) result[0], result -> (BigDecimal) result[1]));
     }
 
+    public Map<String, BigDecimal> getCategoryNameAndAmount(Long userId, String yearMonth){
+        List<Object[]> results = transactionRepository.findTotalAmountsByCategoryNames(userId, yearMonth);
+        return results.stream()
+                .collect(Collectors.toMap(result -> (String) result[0], result -> (BigDecimal) result[1]));
+    }
+
+    public Map<String, BigDecimal> getSourceNameAndAmount(Long userId, String yearMonth){
+        List<Object[]> results = transactionRepository.findTotalAmountsBySourceNames(userId, yearMonth);
+        return results.stream()
+                .collect(Collectors.toMap(result -> (String) result[0], result -> (BigDecimal) result[1]));
+    }
+
     public Map<Integer, BigDecimal> getYearMonthAmounts(Long id, String date){
         List<Object[]> results = transactionRepository.getYearMonthAmounts(id, date);
         return results.stream()
                 .collect(Collectors.toMap(result -> (Integer) result[0], result -> (BigDecimal) result[1]));
+    }
+
+    public Map<Integer, BigDecimal> getMonthAmount(Long id, String date){
+        List<Object[]> results = transactionRepository.getDaysOfMonthSum(id, date);
+
+        Map<Integer, BigDecimal> resultMap = results.stream()
+                .collect(Collectors.toMap(
+                        result -> (Integer) result[0],
+                        result -> (BigDecimal) result[1],
+                        (existing, replacement) -> existing
+                ));
+        Integer lastDay = resultMap.keySet().stream()
+                .max(Integer::compareTo)
+                .orElse(0);
+        if (lastDay == 0) {
+            return resultMap;
+        }
+        Map<Integer, BigDecimal> filledMap = new HashMap<>();
+        for (int day = 1; day <= lastDay; day++) {
+            filledMap.put(day, resultMap.getOrDefault(day, BigDecimal.ZERO));
+        }
+        return filledMap;
     }
 
     public Map<Integer, BigDecimal> getMonthAmountGrowth(Long id, String date, Transaction.TransferType transferType) {

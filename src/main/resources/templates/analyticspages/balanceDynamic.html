@@ -161,10 +161,12 @@
     // Пример данных для проверки
     var cumulativeAmount = /*[[${cumulativeAmount}]]*/ {};
     var cumulativeIncomeAmount = /*[[${cumulativeIncomeAmount}]]*/ {};
+    var spendingLine = /*[[${spendingLine}]]*/ {};
 
     var labels = Object.keys(cumulativeAmount);
     var data = Object.values(cumulativeAmount);
     var incomeData = Object.values(cumulativeIncomeAmount);
+    var lineData = Object.values(spendingLine);
 
     var displayData = [];
     var lastValidValue = null;
@@ -201,6 +203,16 @@
                 pointRadius: 5, // Размер точек на графике
                 pointHoverRadius: 7, // Размер точек при наведении
                 pointBackgroundColor: 'rgb(97,190,113)' // Цвет точек
+            }, {
+                label: 'Прогноз расхода',
+                data: lineData,
+                fill: false,
+                borderColor: 'rgb(128,128,128)', // Серый цвет линии
+                tension: 0.1,
+                pointRadius: 0, // Размер точек на графике
+                pointHoverRadius: 0, // Размер точек при наведении
+                pointBackgroundColor: 'rgb(128,128,128)', // Цвет точек
+                borderDash: [5, 5] // Пунктирная линия
             }]
         },
         options: {

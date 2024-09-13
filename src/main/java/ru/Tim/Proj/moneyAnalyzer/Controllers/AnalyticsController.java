@@ -18,6 +18,7 @@ import ru.Tim.Proj.moneyAnalyzer.Models.Plan.PlannedExpense;
 import ru.Tim.Proj.moneyAnalyzer.Models.Plan.PlannedIncome;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Year;
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
@@ -207,34 +208,17 @@ public class AnalyticsController {
 
         Long id = myUserDetails.getUser().getId();
 
-        Map<Long, BigDecimal> categoryTransSum = null;
-        Map<Long, BigDecimal> IncTotalAmounts = transactionService.getTotalAmountsInc(id, date);
-        Map<Long, BigDecimal> ExpTotalAmounts = transactionService.getTotalAmountsExp(id, date);
-        List<String> categoryNames = null;
-        List<IncomeSource> incSources = incomeSourceService.getCategoryList(id);
-        List<ExpenseCategory> expCategories = expenseCategoryService.getCategoryList(id);
+        Map<String, BigDecimal> categoryTransSum = null;
+        Map<String, BigDecimal> IncTotalAmounts = transactionService.getSourceNameAndAmount(id, date);
+        Map<String, BigDecimal> ExpTotalAmounts = transactionService.getCategoryNameAndAmount(id, date);
+
         if(expOrInc.equals("INC") && (!IncTotalAmounts.isEmpty())){
             categoryTransSum = IncTotalAmounts;
-            categoryNames = categoryTransSum.keySet().stream()
-                    .map(key -> incSources.stream()
-                            .filter(source -> source.getId().equals(key))
-                            .findFirst()
-                            .map(IncomeSource::getSourceName)
-                            .orElse("Unknown"))
-                    .collect(Collectors.toList());
-        }
-        else if(expOrInc.equals("EXP") && !ExpTotalAmounts.isEmpty()){
+        } else if(expOrInc.equals("EXP") && !ExpTotalAmounts.isEmpty()){
             categoryTransSum = ExpTotalAmounts;
-            categoryNames = categoryTransSum.keySet().stream()
-                    .map(key -> expCategories.stream()
-                            .filter(category -> category.getId().equals(key))
-                            .findFirst()
-                            .map(ExpenseCategory::getCategoryName)
-                            .orElse("Unknown"))
-                    .collect(Collectors.toList());
         }
+
         model.addAttribute("categoryMap", categoryTransSum);
-        model.addAttribute("categoryNames", categoryNames);
         model.addAttribute("curDate", date);
         model.addAttribute("prevMonth", prevMonthDate);
         model.addAttribute("nextMonth", nextMonthDate);
@@ -292,13 +276,33 @@ public class AnalyticsController {
         YearMonth prevMonthDate = currentDate.minusMonths(1);
         YearMonth nextMonthDate = currentDate.plusMonths(1);
 
+        Map<Integer, BigDecimal> daysMap = transactionService.getMonthAmount(id, date);
+        for (Map.Entry<Integer, BigDecimal> entry : daysMap.entrySet()) {
+            System.out.println("Ключ: " + entry.getKey() + ", Значение: " + entry.getValue());
+        }
+        Map<Integer, BigDecimal> spendingLine = new HashMap<>();
+        BigDecimal total = BigDecimal.ZERO;
+        int count = 0;
+        for(Map.Entry<Integer, BigDecimal> entry : daysMap.entrySet()){
+            total = total.add(entry.getValue());
+            count++;
+        }
+        BigDecimal avgSpending = count > 0 ? total.divide(BigDecimal.valueOf(count), 2, RoundingMode.HALF_UP) : BigDecimal.ZERO;
+        total = BigDecimal.ZERO;
+        Integer days = currentDate.lengthOfMonth();
+        for(int i = 1; i <= days; i++){
+            spendingLine.put(i, total);
+            total = total.add(avgSpending);
+        }
+
         model.addAttribute("curDate", date);
         model.addAttribute("prevMonth", prevMonthDate);
         model.addAttribute("nextMonth", nextMonthDate);
-        model.addAttribute("cumulativeAmount",
-                transactionService.getMonthAmountGrowth(id, date, Transaction.TransferType.EXPENSE));
-        model.addAttribute("cumulativeIncomeAmount",
-                transactionService.getMonthAmountGrowth(id, date, Transaction.TransferType.INCOME));
+        model.addAttribute("cumulativeAmount", transactionService
+                .getMonthAmountGrowth(id, date, Transaction.TransferType.EXPENSE));
+        model.addAttribute("cumulativeIncomeAmount", transactionService
+                .getMonthAmountGrowth(id, date, Transaction.TransferType.INCOME));
+        model.addAttribute("spendingLine", spendingLine);
         return "analyticspages/balanceDynamic";
     }
 
