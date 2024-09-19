@@ -277,9 +277,6 @@ public class AnalyticsController {
         YearMonth nextMonthDate = currentDate.plusMonths(1);
 
         Map<Integer, BigDecimal> daysMap = transactionService.getMonthAmount(id, date);
-        for (Map.Entry<Integer, BigDecimal> entry : daysMap.entrySet()) {
-            System.out.println("Ключ: " + entry.getKey() + ", Значение: " + entry.getValue());
-        }
         Map<Integer, BigDecimal> spendingLine = new HashMap<>();
         BigDecimal total = BigDecimal.ZERO;
         int count = 0;
@@ -333,6 +330,36 @@ public class AnalyticsController {
 
         ePlannedService.addPlannedExpense(plannedExpense);
 
+        return "redirect:/profile/analytics/plans?date=" + date;
+    }
+
+    @PostMapping("/plans/copyPlan")
+    public String copyPlan(@RequestParam(name = "currentDate") String date,
+                           @AuthenticationPrincipal MyUserDetails myUserDetails){
+        Long id = myUserDetails.getUser().getId();
+        String prevDate = YearMonth.parse(date).minusMonths(1).toString();
+        List<PlannedExpense> expPlans = ePlannedService.getPlannedExpList(id, prevDate);
+        List<PlannedIncome> incPlans = iPlannedService.getPlannedIncList(id, prevDate);
+        for(PlannedExpense expense : expPlans){
+            if(expense != null){
+                PlannedExpense newPlan = new PlannedExpense();
+                newPlan.setExpenseCategory(expense.getExpenseCategory());
+                newPlan.setYearMonth(date);
+                newPlan.setAmount(expense.getAmount());
+                newPlan.setUser(expense.getUser());
+                ePlannedService.addPlannedExpense(newPlan);
+            }
+        }
+        for(PlannedIncome income : incPlans){
+            if(income != null){
+                PlannedIncome newPlan = new PlannedIncome();
+                newPlan.setIncomeSource(income.getIncomeSource());
+                newPlan.setYearMonth(date);
+                newPlan.setAmount(income.getAmount());
+                newPlan.setUser(income.getUser());
+                iPlannedService.addIncomePlan(newPlan);
+            }
+        }
         return "redirect:/profile/analytics/plans?date=" + date;
     }
 

@@ -26,6 +26,7 @@ public class HoldersService {
         cashAccount.setAmount(BigDecimal.ZERO);
         bankAccount.setUser(user);
         cashAccount.setUser(user);
+        bankAccount.setCreditLimit(BigDecimal.ZERO);
 
         holderRepository.save(bankAccount);
         holderRepository.save(cashAccount);

@@ -220,10 +220,10 @@
                         <span th:case="*">
                             <!-- Мы используем "*", чтобы отобразить любое другое значение -->
                             <span th:if="${totalDifference > 0}">
-                                Общий расход в этом месяце ниже на <span th:text="${totalDifference}"></span>
+                                Общий расход в этом месяце выше на <span th:text="${totalDifference}"></span>
                             </span>
                             <span th:if="${totalDifference < 0}">
-                                Общий расход в этом месяце выше на <span th:text="${-totalDifference}"></span>
+                                Общий расход в этом месяце ниже на <span th:text="${-totalDifference}"></span>
                             </span>
                         </span>
                     </span>

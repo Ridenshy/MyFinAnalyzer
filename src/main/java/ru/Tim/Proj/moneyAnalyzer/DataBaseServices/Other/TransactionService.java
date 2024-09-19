@@ -94,9 +94,11 @@ public class TransactionService {
                         result -> (BigDecimal) result[1],
                         (existing, replacement) -> existing
                 ));
-        Integer lastDay = resultMap.keySet().stream()
-                .max(Integer::compareTo)
-                .orElse(0);
+        int lastDay = Math.max(
+                resultMap.keySet().stream().max(Integer::compareTo).orElse(0),
+                YearMonth.parse(date).equals(YearMonth.now()) ? LocalDate.now().getDayOfMonth() : 0
+        );
+
         if (lastDay == 0) {
             return resultMap;
         }
@@ -116,10 +118,12 @@ public class TransactionService {
         YearMonth yearMonth = YearMonth.parse(date);
         int daysInMonth = yearMonth.lengthOfMonth();
 
-        Integer lastDay = 0;
+        int lastDay = 0;
 
         if(!results.isEmpty()){
-            lastDay = (Integer) results.get(results.size() - 1)[0];
+            lastDay = Math.max(
+                    (int) results.get(results.size() - 1)[0],
+                    YearMonth.parse(date).equals(YearMonth.now()) ? LocalDate.now().getDayOfMonth() : 0);
         }
 
         for (int day = 1; day <= daysInMonth; day++) {

@@ -287,6 +287,12 @@
                     <button onclick="toggleForm('income-form')">Создать план дохода</button>
                     <button onclick="toggleForm('expense-form')">Создать план расхода</button>
                 </div>
+                <div id="copy-plans" class="button-group" th:if="${totalInc} == 0 and ${totalExp} == 0">
+                    <form th:action="@{/profile/analytics/plans/copyPlan}" th:method="post">
+                        <input type="hidden" name="currentDate" th:value="${curDate}">
+                        <button type="submit">Перенести план прошлого месяца</button>
+                    </form>
+                </div>
                 <!-- Форма для создания плана дохода -->
                 <div id="income-form" class="form-container">
                     <h3>Добавить план дохода</h3>

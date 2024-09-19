@@ -191,27 +191,30 @@
                 fill: false,
                 borderColor: 'rgb(255,98,97)',
                 tension: 0.1,
-                pointRadius: 5, // Размер точек на графике
-                pointHoverRadius: 7, // Размер точек при наведении
-                pointBackgroundColor: 'rgb(255,98,97)' // Цвет точек
+                pointRadius: 10, // Размер точек на графике
+                pointHoverRadius: 10, // Размер точек при наведении
+                pointBorderColor: 'rgba(128,128,128, 0)',
+                pointBackgroundColor: 'rgba(255,98,97, 0)' // Цвет точек
             }, {
                 label: 'Доход',
                 data: incomeData,
                 fill: false,
                 borderColor: 'rgb(97,190,113)',
                 tension: 0.1,
-                pointRadius: 5, // Размер точек на графике
-                pointHoverRadius: 7, // Размер точек при наведении
-                pointBackgroundColor: 'rgb(97,190,113)' // Цвет точек
+                pointRadius: 10, // Размер точек на графике
+                pointHoverRadius: 10, // Размер точек при наведении
+                pointBorderColor: 'rgba(128,128,128, 0)',
+                pointBackgroundColor: 'rgba(97, 190, 113, 0)' // Полностью невидимые точки
             }, {
                 label: 'Прогноз расхода',
                 data: lineData,
                 fill: false,
                 borderColor: 'rgb(128,128,128)', // Серый цвет линии
                 tension: 0.1,
-                pointRadius: 0, // Размер точек на графике
-                pointHoverRadius: 0, // Размер точек при наведении
-                pointBackgroundColor: 'rgb(128,128,128)', // Цвет точек
+                pointRadius: 10, // Размер точек на графике
+                pointHoverRadius: 10, // Размер точек при наведении
+                pointBackgroundColor: 'rgba(128,128,128, 0)', // Цвет точек
+                pointBorderColor: 'rgba(128,128,128, 0)',
                 borderDash: [5, 5] // Пунктирная линия
             }]
         },
