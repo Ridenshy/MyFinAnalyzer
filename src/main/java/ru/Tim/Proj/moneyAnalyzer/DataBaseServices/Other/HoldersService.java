@@ -66,4 +66,7 @@ public class HoldersService {
     public List<MoneyHolders> getDepositOrSavings(Long userId) { return holderRepository.findAllDepositOrSavings(userId); }
 
     public BigDecimal getBalance(Long userId) { return holderRepository.getTotalBalance(userId); }
+
+    public BigDecimal getCashAndBankAmount(Long userId){return holderRepository.getCashAndBankAmount(userId); }
+
 }

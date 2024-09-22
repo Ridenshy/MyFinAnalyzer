@@ -65,10 +65,11 @@ public class ExcelDataController {
             redirectAttributes.addFlashAttribute("message", "Please select a file to upload.");
             return "redirect:/profile";
         }
-        if(isDeleteOldData){
-            excelService.deleteOldData(user);
-        }
+
         try {
+            if(isDeleteOldData){
+                excelService.deleteOldData(user);
+            }
             excelService.importUserDataExcel(user, file);
             redirectAttributes.addFlashAttribute("message", "File successfully imported.");
         } catch (Exception e) {

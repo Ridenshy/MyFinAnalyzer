@@ -126,7 +126,11 @@ public class AuthController {
     public String sendRecoveryMail(@RequestParam("recoveryEmail") String email,
                                    RedirectAttributes redirectAttributes){
         if(!accountDataService.emailExists(email)) {
-            redirectAttributes.addFlashAttribute("existError");
+            redirectAttributes.addFlashAttribute("existError", "Аккаунт не существует");
+            return "redirect:/send-recovery";
+        }
+        if(accountDataService.isEnabled(email)){
+            redirectAttributes.addFlashAttribute("existError", "Аккаунт не подтвержден");
             return "redirect:/send-recovery";
         }
         User user = accountDataService.findUserByEmail(email);

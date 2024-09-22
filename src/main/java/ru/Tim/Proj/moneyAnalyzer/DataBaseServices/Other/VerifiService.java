@@ -11,7 +11,9 @@ import ru.Tim.Proj.moneyAnalyzer.Models.Tokens.RecoveryToken;
 import ru.Tim.Proj.moneyAnalyzer.Models.Tokens.VerifiToken;
 import ru.Tim.Proj.moneyAnalyzer.Models.Tokens.ChangeEmailToken;
 import ru.Tim.Proj.moneyAnalyzer.Repositoryes.Other.TokenRepository;
+import ru.Tim.Proj.moneyAnalyzer.Repositoryes.Other.UserRepository;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -21,11 +23,13 @@ public class VerifiService {
     private String hostUrl;
 
     private final TokenRepository tokenRepository;
+    private final UserRepository userRepository;
     private final JavaMailSender mailSender;
 
-    public VerifiService(TokenRepository tokenRepository, JavaMailSender mailSender) {
+    public VerifiService(TokenRepository tokenRepository, JavaMailSender mailSender, UserRepository userRepository) {
         this.tokenRepository = tokenRepository;
         this.mailSender = mailSender;
+        this.userRepository = userRepository;
     }
 
     @Async
@@ -89,4 +93,17 @@ public class VerifiService {
     public void deleteToken(EmailToken token){
         tokenRepository.delete(token);
     }
+
+    public void deleteTokens(){
+        for(EmailToken token : tokenRepository.getExpiredTokens()){
+            tokenRepository.delete(token);
+        }
+        for(User user : userRepository.findByEnabledFalse()){
+            if(!tokenRepository.existsByUserId(user.getId())){
+                userRepository.delete(user);
+                System.out.println("пользователь удален");
+            }
+        }
+    }
+
 }

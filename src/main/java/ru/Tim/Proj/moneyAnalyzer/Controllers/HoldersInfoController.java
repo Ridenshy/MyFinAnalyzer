@@ -36,6 +36,7 @@ public class HoldersInfoController {
         model.addAttribute("Holders", holdersService.getCashOrBank(id));
         model.addAttribute("Deposits", holdersService.getDepositOrSavings(id));
         model.addAttribute("totalBalance", holdersService.getBalance(id));
+        model.addAttribute("totalBank", holdersService.getCashAndBankAmount(id));
         return "accountpages/moneyaccs";
     }
 

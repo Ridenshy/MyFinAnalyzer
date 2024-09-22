@@ -66,6 +66,15 @@
             margin-top: 100px;
         }
 
+        .amount-display {
+            background-color: #fff;
+            padding: 10px;
+            width: 95%;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
         .scroll-box {
             height: 350px;
             overflow-y: auto;
@@ -256,9 +265,15 @@
 <!-- Основной контейнер -->
 <div class="container">
     <!-- Левая секция (счета и накопления) -->
-    <div class="account-section">
+        <div class="account-section">
+            <div class="amount-display">
+                <span th:if="${totalBank} != null" th:text="'Баланс счетов: ' + ${totalBank} + ' ₽'"
+                      th:classappend="${totalBank < 0} ? 'balance-negative' : 'balance-positive'">
+                    Баланс счетов: 0 ₽
+                </span>
+            <span th:if="${totalBalance} == null" text="Общий баласн 0 ₽"></span>
+        </div>
         <div class="scroll-box">
-            <h3>Счета</h3>
             <!-- Здесь будут динамически добавляться карты счетов -->
             <div th:each="holder : ${Holders}" class="account-item">
                 <div class="account-details">
@@ -335,7 +350,6 @@
             </div>
         </div>
         <div class="scroll-box">
-            <h3>Накопления</h3>
             <!-- Здесь будут динамически добавляться карты накоплений -->
             <div th:each="deposit : ${Deposits}" class="account-item">
                 <div class="account-details">

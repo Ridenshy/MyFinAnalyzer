@@ -112,6 +112,7 @@
         <div>
             <input type="email" name="recoveryEmail" placeholder="Введите вашу электронную почту" required>
             <div class="error-message" th:if="${emailError}" th:text="${emailError}"></div>
+            <div th:if="${existError}" th:text="${existError}" class="error-message"></div>
         </div>
         <button type="submit">Отправить</button>
     </form>

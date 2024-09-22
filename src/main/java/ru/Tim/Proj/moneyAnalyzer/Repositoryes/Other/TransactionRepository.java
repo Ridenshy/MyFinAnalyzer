@@ -26,7 +26,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             "(:userId IS NULL OR t.user.id = :userId) AND " +
             "(:expenseCategories IS NULL OR t.expenseCategory.id IN :expenseCategories) AND " +
             "(:incomeSources IS NULL OR t.incomeSource.id IN :incomeSources) AND " +
-            "(:typeOfTransfer IS NULL OR t.typeOfTransfer = :typeOfTransfer) ORDER BY t.transactionDate DESC")
+            "(:typeOfTransfer IS NULL OR t.typeOfTransfer = :typeOfTransfer) ORDER BY t.transactionDate DESC, t.id DESC")
     List<Transaction> getFiltratedList(@Param("startDate") LocalDate startDate,
                                        @Param("endDate") LocalDate endDate,
                                        @Param("minAmount") BigDecimal minAmount,

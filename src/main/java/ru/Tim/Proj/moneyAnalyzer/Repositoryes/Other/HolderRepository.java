@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.web.bind.annotation.RequestParam;
 import ru.Tim.Proj.moneyAnalyzer.Models.HolderModels.MoneyHolders;
 import ru.Tim.Proj.moneyAnalyzer.Models.Other.User;
 
@@ -24,6 +25,9 @@ public interface HolderRepository extends JpaRepository<MoneyHolders, Long> {
 
     @Query("SELECT SUM(m.amount) FROM MoneyHolders m WHERE m.user.id = :userId")
     BigDecimal getTotalBalance(@Param("userId") Long userId);
+
+    @Query("SELECT SUM(m.amount) FROM MoneyHolders m WHERE TYPE(m) IN(CashAccount, BankAccount) AND m.user.id = :userId")
+    BigDecimal getCashAndBankAmount(@Param("userId") Long userId);
 
     List<MoneyHolders> findAllByUser(User user);
 

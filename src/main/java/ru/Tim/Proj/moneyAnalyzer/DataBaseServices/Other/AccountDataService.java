@@ -38,4 +38,8 @@ public class AccountDataService {
     public User findUserByEmail(String email){
         return userRepository.findByEmail(email).orElse(null);
     }
+
+    public boolean isEnabled(String email){
+        return userRepository.isEnabledFalseFindByEmail(email);
+    }
 }
