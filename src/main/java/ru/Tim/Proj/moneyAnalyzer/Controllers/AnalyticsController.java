@@ -19,13 +19,11 @@ import ru.Tim.Proj.moneyAnalyzer.Models.Plan.PlannedIncome;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.Year;
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -33,15 +31,15 @@ import java.util.stream.Collectors;
 @Controller
 public class AnalyticsController {
 
-    private final ePlannedService ePlannedService;
-    private final iPlannedService iPlannedService;
+    private final EPlannedService ePlannedService;
+    private final IPlannedService iPlannedService;
     private final ExpenseCategoryService expenseCategoryService;
     private final IncomeSourceService incomeSourceService;
     private final TransactionService transactionService;
 
     @Autowired
-    public AnalyticsController(ePlannedService ePlannedService,
-                               iPlannedService iPlannedService,
+    public AnalyticsController(EPlannedService ePlannedService,
+                               IPlannedService iPlannedService,
                                ExpenseCategoryService expenseCategoryService,
                                IncomeSourceService incomeSourceService,
                                TransactionService transactionService) {
@@ -81,16 +79,9 @@ public class AnalyticsController {
 
         List<PlannedIncome> plannedIncList = iPlannedService.getPlannedIncList(id, date);
         List<PlannedExpense> plannedExpList = ePlannedService.getPlannedExpList(id, date);
-        BigDecimal totalIncome = BigDecimal.ZERO;
-        BigDecimal totalExpense = BigDecimal.ZERO;
-        BigDecimal freeSum = BigDecimal.ZERO;
-        for(PlannedIncome plannedIncome : plannedIncList){
-            totalIncome = totalIncome.add(plannedIncome.getAmount());
-        }
-        for(PlannedExpense plannedExpense : plannedExpList){
-            totalExpense = totalExpense.add(plannedExpense.getAmount());
-        }
-        freeSum = freeSum.add(totalIncome).subtract(totalExpense);
+        BigDecimal totalIncome = plannedIncList.isEmpty() ? BigDecimal.ZERO : iPlannedService.getTotalPlanAmount(id, date);
+        BigDecimal totalExpense = plannedExpList.isEmpty() ? BigDecimal.ZERO :  ePlannedService.getTotalPlanAmount(id, date);
+        BigDecimal freeSum = BigDecimal.ZERO.add(totalIncome).subtract(totalExpense);
 
         List<IncomeSource> sourceList = incomeSourceService.getCategoryList(id);
         Set<Long> usedIncIds = plannedIncList.stream()
@@ -212,17 +203,30 @@ public class AnalyticsController {
         Map<String, BigDecimal> IncTotalAmounts = transactionService.getSourceNameAndAmount(id, date);
         Map<String, BigDecimal> ExpTotalAmounts = transactionService.getCategoryNameAndAmount(id, date);
 
-        if(expOrInc.equals("INC") && (!IncTotalAmounts.isEmpty())){
-            categoryTransSum = IncTotalAmounts;
-        } else if(expOrInc.equals("EXP") && !ExpTotalAmounts.isEmpty()){
-            categoryTransSum = ExpTotalAmounts;
-        }
 
+        if(expOrInc.equals("INC") && (!IncTotalAmounts.isEmpty())){
+            categoryTransSum = IncTotalAmounts.entrySet().stream()
+                    .sorted(Map.Entry.<String, BigDecimal>comparingByValue().reversed())
+                    .collect(Collectors
+                            .toMap(Map.Entry::getKey, Map.Entry::getValue,(e1, e2) -> e1, LinkedHashMap::new));
+        } else if(!ExpTotalAmounts.isEmpty()){
+            categoryTransSum = ExpTotalAmounts.entrySet().stream()
+                    .sorted(Map.Entry.<String, BigDecimal>comparingByValue().reversed())
+                    .collect(Collectors
+                            .toMap(Map.Entry::getKey, Map.Entry::getValue,(e1, e2) -> e1, LinkedHashMap::new));;
+        }
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        if(categoryTransSum != null){
+            for(Map.Entry<String, BigDecimal> entry : categoryTransSum.entrySet()){
+                totalAmount = totalAmount.add(entry.getValue());
+            }
+        }
         model.addAttribute("categoryMap", categoryTransSum);
         model.addAttribute("curDate", date);
         model.addAttribute("prevMonth", prevMonthDate);
         model.addAttribute("nextMonth", nextMonthDate);
         model.addAttribute("expOrInc", expOrInc);
+        model.addAttribute("totalAmount", totalAmount);
 
         return "analyticspages/categoryChart";
     }
@@ -286,19 +290,38 @@ public class AnalyticsController {
         }
         BigDecimal avgSpending = count > 0 ? total.divide(BigDecimal.valueOf(count), 2, RoundingMode.HALF_UP) : BigDecimal.ZERO;
         total = BigDecimal.ZERO;
-        Integer days = currentDate.lengthOfMonth();
+        int days = currentDate.lengthOfMonth();
         for(int i = 1; i <= days; i++){
             spendingLine.put(i, total);
             total = total.add(avgSpending);
         }
 
+        Map<Integer, BigDecimal> cumulativeExpenseAmount =  transactionService
+                .getMonthAmountGrowth(id, date, Transaction.TransferType.EXPENSE);
+        Map<Integer, BigDecimal> cumulativeIncomeAmount = transactionService
+                .getMonthAmountGrowth(id, date, Transaction.TransferType.INCOME);
+
+        Map<Integer, BigDecimal> planExpenseGrowth = new HashMap<>(cumulativeExpenseAmount);
+        int pastDays = cumulativeExpenseAmount.size();
+        int remainingDays = days - pastDays;
+        if(remainingDays != 0 && remainingDays < days){
+            BigDecimal lastDayExpense = cumulativeExpenseAmount.get(pastDays);
+            BigDecimal avgRemainingExp = ePlannedService.getTotalPlanAmount(id, date).subtract(lastDayExpense);
+            avgRemainingExp = avgRemainingExp.divide(BigDecimal.valueOf(remainingDays), RoundingMode.HALF_DOWN);
+
+            BigDecimal totalPlannedExp = lastDayExpense;
+            for(int i = pastDays; i <= days; i++){
+                planExpenseGrowth.put(i, totalPlannedExp);
+                totalPlannedExp = totalPlannedExp.add(avgRemainingExp);
+            }
+
+        }
         model.addAttribute("curDate", date);
         model.addAttribute("prevMonth", prevMonthDate);
         model.addAttribute("nextMonth", nextMonthDate);
-        model.addAttribute("cumulativeAmount", transactionService
-                .getMonthAmountGrowth(id, date, Transaction.TransferType.EXPENSE));
-        model.addAttribute("cumulativeIncomeAmount", transactionService
-                .getMonthAmountGrowth(id, date, Transaction.TransferType.INCOME));
+        model.addAttribute("cumulativeAmount", cumulativeExpenseAmount);
+        model.addAttribute("cumulativeIncomeAmount", cumulativeIncomeAmount);
+        model.addAttribute("planOfExpenses", planExpenseGrowth);
         model.addAttribute("spendingLine", spendingLine);
         return "analyticspages/balanceDynamic";
     }

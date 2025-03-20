@@ -4,20 +4,23 @@ import ru.Tim.Proj.moneyAnalyzer.Models.Plan.PlannedIncome;
 import ru.Tim.Proj.moneyAnalyzer.Repositoryes.Plans.IPlanRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
-public class iPlannedService {
+public class IPlannedService {
 
     private final IPlanRepository iPlanRepository;
 
-    public iPlannedService(IPlanRepository iPlanRepository) {
+    public IPlannedService(IPlanRepository iPlanRepository) {
         this.iPlanRepository = iPlanRepository;
     }
 
     public void addIncomePlan(PlannedIncome plannedIncome){
         iPlanRepository.save(plannedIncome);
     }
+
+    public BigDecimal getTotalPlanAmount(Long id, String date){return iPlanRepository.getTotalPlanSum(id, date);}
 
     public void deleteIncomePlan(Long id){
         iPlanRepository.deleteById(id);

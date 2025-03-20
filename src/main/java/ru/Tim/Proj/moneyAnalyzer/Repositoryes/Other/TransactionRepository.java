@@ -101,6 +101,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Object[]> getYearMonthAmounts(@Param("userId") Long id,
                                        @Param("date") String date);
 
+
+
     @Transactional
     @Modifying
     @Query("DELETE FROM Transaction t WHERE t.user = :user")

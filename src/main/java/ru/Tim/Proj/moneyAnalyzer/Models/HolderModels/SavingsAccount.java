@@ -28,16 +28,40 @@ public class SavingsAccount extends MoneyHolders {
     @Column(name = "drop_date")
     private LocalDate dropDate;
 
+    @Column(name = "day_lowest_amount")
+    private BigDecimal minAmount;
+
+    @Column(name = "last_update_date")
+    private LocalDate updateDate;
+
     public SavingsAccount() {}
 
     public SavingsAccount(Long id, String holderName, BigDecimal amount, boolean activeCheck,
                           LocalDate openDate, BigDecimal interestRate,
-                          LocalDate nextInterestDate, LocalDate dropDate) {
+                          LocalDate nextInterestDate, LocalDate dropDate, LocalDate updateDate) {
         super(id, holderName, amount, activeCheck);
         this.openDate = openDate;
         this.interestRate = interestRate;
         this.nextInterestDate = nextInterestDate;
         this.dropDate = dropDate;
+        this.minAmount = amount;
+        this.updateDate = updateDate;
+    }
+
+    public LocalDate getUpdateDate() {
+        return updateDate;
+    }
+
+    public void setUpdateDate(LocalDate updateDate) {
+        this.updateDate = updateDate;
+    }
+
+    public BigDecimal getMinAmount() {
+        return minAmount;
+    }
+
+    public void setMinAmount(BigDecimal minAmount) {
+        this.minAmount = minAmount;
     }
 
     public LocalDate getDropDate() { return dropDate; }
@@ -65,20 +89,30 @@ public class SavingsAccount extends MoneyHolders {
         LocalDate currentDate = LocalDate.now();
         boolean yearCheck = LocalDate.now().isLeapYear();
 
-        if (!currentDate.isBefore(nextInterestDate) && !currentDate.isEqual(nextInterestDate)) {
-            int daysScale = yearCheck ? 36600 : 36500;
-            BigDecimal balance = getAmount();
-            BigDecimal rate = interestRate.divide(BigDecimal.valueOf(daysScale), 8, RoundingMode.HALF_UP);
-            nonCapitalizedInterest = nonCapitalizedInterest.add(balance.multiply(rate));
-            nextInterestDate = nextInterestDate.plusDays(1);
-            dropDate = openDate.plusMonths(1);
-        }
-
-        if(!currentDate.isBefore(dropDate)){
+        if(!currentDate.isBefore(dropDate) && !currentDate.isEqual(dropDate)){
             BigDecimal balance = getAmount();
             setAmount(balance.add(nonCapitalizedInterest));
             nonCapitalizedInterest = BigDecimal.ZERO;
-            setOpenDate(dropDate);
+            openDate = dropDate;
+            dropDate = openDate.plusMonths(1);
+        }
+
+        if (!currentDate.isBefore(nextInterestDate) && !currentDate.isEqual(nextInterestDate)) {
+            int daysScale = yearCheck ? 36600 : 36500;
+            BigDecimal balance = minAmount;
+            BigDecimal rate = interestRate.divide(BigDecimal.valueOf(daysScale), 8, RoundingMode.HALF_UP);
+            nonCapitalizedInterest = nonCapitalizedInterest.add(balance.multiply(rate));
+            nextInterestDate = nextInterestDate.plusDays(1);
+        }
+
+    }
+
+    @Override
+    public void calculateMinAmount() {
+        BigDecimal curAmount = getAmount();
+        updateDate = LocalDate.now();
+        if(minAmount.compareTo(curAmount) > 0){
+            minAmount = curAmount;
         }
     }
 

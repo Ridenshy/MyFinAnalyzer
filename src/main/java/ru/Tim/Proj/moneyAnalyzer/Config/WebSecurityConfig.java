@@ -18,7 +18,7 @@ import ru.Tim.Proj.moneyAnalyzer.Services.MyUserDetailsService;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-public class WebSecurityConfig {
+public class WebSecurityConfig  {
 
     @Bean
     public UserDetailsService userDetailsService() {
@@ -45,7 +45,7 @@ public class WebSecurityConfig {
     AuthenticationFailureHandler authenticationFailureHandler(){
         return new AuthFailureHandler();
     }
-
+    
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();

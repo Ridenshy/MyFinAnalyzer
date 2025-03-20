@@ -13,6 +13,7 @@ import ru.Tim.Proj.moneyAnalyzer.Models.HolderModels.CashAccount;
 import ru.Tim.Proj.moneyAnalyzer.Models.HolderModels.DepositAccount;
 import ru.Tim.Proj.moneyAnalyzer.Models.HolderModels.SavingsAccount;
 import ru.Tim.Proj.moneyAnalyzer.Models.HolderModels.MoneyHolders;
+import ru.Tim.Proj.moneyAnalyzer.Models.Other.Transaction;
 import ru.Tim.Proj.moneyAnalyzer.Models.Other.User;
 
 import java.math.BigDecimal;
@@ -80,12 +81,17 @@ public class HoldersInfoController {
         User user = myUserDetails.getUser();
         savings.setUser(user);
         savings.setActiveCheck(true);
-        if(LocalDate.now().isBefore(LocalDate.now().withDayOfMonth(openDay))){
-            savings.setOpenDate(LocalDate.now().withDayOfMonth(openDay).minusMonths(1));
+        LocalDate open = LocalDate.now().withDayOfMonth(openDay);
+        LocalDate now = LocalDate.now();
+        if(now.isBefore(open) || now.isEqual(open)){
+            savings.setOpenDate(open.minusMonths(1));
         }else {
-            savings.setOpenDate(LocalDate.now().withDayOfMonth(openDay));
+            savings.setOpenDate(open);
         }
+        savings.setUpdateDate(now);
         savings.setNextInterestDate(savings.getOpenDate());
+        savings.setDropDate(savings.getOpenDate().plusMonths(1));
+        savings.calculateMinAmount();
         savings.calcWhileNormalDate();
         holdersService.createOrUpdateHolder(savings);
         return "redirect:/profile/holders";
@@ -143,7 +149,6 @@ public class HoldersInfoController {
 
         BigDecimal getterAmount = getterAccount.getAmount();
         BigDecimal savingsAmount = savingsAccount.getAmount();
-
         if(action.equals("subs")){
             getterAccount.setAmount(getterAmount.add(amount));
             savingsAccount.setAmount(savingsAmount.subtract(amount));
@@ -151,7 +156,7 @@ public class HoldersInfoController {
             getterAccount.setAmount(getterAmount.subtract(amount));
             savingsAccount.setAmount(savingsAmount.add(amount));
         }
-
+        savingsAccount.calculateMinAmount();
         holdersService.createOrUpdateHolder(savingsAccount);
         holdersService.createOrUpdateHolder(getterAccount);
 

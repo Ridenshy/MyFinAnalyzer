@@ -2,9 +2,7 @@ package ru.Tim.Proj.moneyAnalyzer.Models.HolderModels;
 
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Digits;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import ru.Tim.Proj.moneyAnalyzer.Models.Other.Transaction;
 import ru.Tim.Proj.moneyAnalyzer.Models.Other.User;
 
@@ -27,7 +25,7 @@ public abstract class MoneyHolders {
     private String holderName;
 
     @Column(name = "holder_amount")
-    @Digits(integer = 38, fraction = 2, message = "введено не верное число")
+    @DecimalMax("99999999999999999.00")
     private BigDecimal amount;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -78,4 +76,6 @@ public abstract class MoneyHolders {
     public void setTransactions(List<Transaction> transactions) { this.transactions = transactions; }
 
     public abstract void calculateInterest();
+
+    public abstract void calculateMinAmount();
 }

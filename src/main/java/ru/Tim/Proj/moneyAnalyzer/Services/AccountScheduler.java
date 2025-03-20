@@ -30,6 +30,7 @@ public class AccountScheduler {
     @Scheduled(cron = "0 0 0 * * ?")
     public void calculateInterestForAllAccounts() {
         holdersService.calculateInterestForAllAccounts();
+        holdersService.updateDayMinAmount();
     }
 
     @Scheduled(cron = "0 0 0/1 * * *")

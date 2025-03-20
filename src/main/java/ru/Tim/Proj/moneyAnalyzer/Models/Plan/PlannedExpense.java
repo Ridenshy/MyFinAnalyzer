@@ -1,6 +1,8 @@
 package ru.Tim.Proj.moneyAnalyzer.Models.Plan;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import ru.Tim.Proj.moneyAnalyzer.Models.Category.ExpenseCategory;
 import ru.Tim.Proj.moneyAnalyzer.Models.Other.User;
 
@@ -18,6 +20,8 @@ public class PlannedExpense {
     private ExpenseCategory expenseCategory;
 
     @Column(nullable = false)
+    @DecimalMin("0.00")
+    @DecimalMax("99999999999999999.00")
     private BigDecimal amount;
 
     @ManyToOne(fetch = FetchType.LAZY)

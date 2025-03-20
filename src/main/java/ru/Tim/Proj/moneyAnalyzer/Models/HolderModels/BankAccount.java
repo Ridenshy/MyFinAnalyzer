@@ -31,4 +31,10 @@ public class BankAccount extends MoneyHolders{
 
     @Override
     public void calculateInterest() {}
+
+    @Override
+    public void calculateMinAmount() {
+
+    }
+
 }

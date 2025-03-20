@@ -152,6 +152,7 @@
 
 <script th:inline="javascript">
     var categoryMap = /*[[${categoryMap}]]*/ {};
+    const totalAmount = /*[[${totalAmount}]]*/ 0;
 
     var colors = [
         '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
@@ -181,6 +182,15 @@
                     labels: {
                         font: {
                             size: 22
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                            var value = tooltipItem.raw; // Значение категории
+                            var percentage = ((value / totalAmount) * 100).toFixed(2); // Процент от totalAmount
+                            return tooltipItem.label + ': ' + value + ' (' + percentage + '%)'; // Отображение процента
                         }
                     }
                 }

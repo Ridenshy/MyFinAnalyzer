@@ -20,7 +20,8 @@ public class Transaction {
     @Column(name = "transaction_date", nullable = false)
     private LocalDate transactionDate;
 
-    @Digits(integer = 38, fraction = 2, message = "введено не верное число")
+    @DecimalMin("0.00")
+    @DecimalMax("99999999999999999.00")
     @Positive(message = "сумма должна быть положительной")
     @Column(name = "amount", nullable = false)
     private BigDecimal amount;

@@ -4,6 +4,7 @@ package ru.Tim.Proj.moneyAnalyzer.Controllers;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,6 +12,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.Tim.Proj.moneyAnalyzer.Config.MyUserDetails;
+import ru.Tim.Proj.moneyAnalyzer.DTO.TransactionDTO;
 import ru.Tim.Proj.moneyAnalyzer.DataBaseServices.Category.ExpenseCategoryService;
 import ru.Tim.Proj.moneyAnalyzer.DataBaseServices.Other.HoldersService;
 import ru.Tim.Proj.moneyAnalyzer.DataBaseServices.Category.IncomeSourceService;
@@ -24,6 +26,7 @@ import ru.Tim.Proj.moneyAnalyzer.Models.Other.User;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+
 
 @Controller
 @RequestMapping("/profile/operations")
@@ -44,6 +47,7 @@ public class TransactionsController {
         this.transactionService = transactionService;
         this.holdersService = holdersService;
     }
+
 
     @GetMapping
     public String OperationPage(@ModelAttribute("transaction") Transaction transaction,

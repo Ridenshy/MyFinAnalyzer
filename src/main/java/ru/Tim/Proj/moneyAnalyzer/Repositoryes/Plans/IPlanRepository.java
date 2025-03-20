@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import ru.Tim.Proj.moneyAnalyzer.Models.Other.User;
 import ru.Tim.Proj.moneyAnalyzer.Models.Plan.PlannedIncome;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface IPlanRepository extends JpaRepository<PlannedIncome, Long> {
@@ -15,6 +16,10 @@ public interface IPlanRepository extends JpaRepository<PlannedIncome, Long> {
     @Query("SELECT i FROM PlannedIncome i WHERE i.user.id = :userId AND i.yearMonth = :planDate ORDER BY i.incomeSource.id ASC")
     List<PlannedIncome> getCurrentMonthIncPlans(@Param("userId") Long id,
                                                 @Param("planDate") String yearMonth);
+
+    @Query("SELECT SUM(i.amount) FROM PlannedIncome i WHERE i.user.id = :userId AND i.yearMonth = :planDate")
+    BigDecimal getTotalPlanSum(@Param("userId") Long id,
+                               @Param("planDate") String yearMonth);
 
     List<PlannedIncome> findAllByUser(User user);
 

@@ -10,6 +10,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+
         }
         .navbar {
             background-color: #333;
@@ -162,23 +163,16 @@
     var cumulativeAmount = /*[[${cumulativeAmount}]]*/ {};
     var cumulativeIncomeAmount = /*[[${cumulativeIncomeAmount}]]*/ {};
     var spendingLine = /*[[${spendingLine}]]*/ {};
+    var planOfExpenses = /*[[${planOfExpenses}]]*/ {};
 
-    var labels = Object.keys(cumulativeAmount);
-    var data = Object.values(cumulativeAmount);
+    var labels = Object.keys(cumulativeIncomeAmount);
+    var expenseData = Object.values(cumulativeAmount);
     var incomeData = Object.values(cumulativeIncomeAmount);
     var lineData = Object.values(spendingLine);
+    var planData = Object.values(planOfExpenses);
 
-    var displayData = [];
-    var lastValidValue = null;
-
-    for (var i = 0; i < labels.length; i++) {
-        if (data[i] !== -1) {
-            lastValidValue = data[i];
-            displayData.push(data[i]);
-        } else{
-            break;
-        }
-    }
+    var lastIncomeValue = incomeData[incomeData.length - 1] || 0;
+    var maxYValue = lastIncomeValue + (lastIncomeValue * 0.10);
 
     var ctx = document.getElementById('lineChart').getContext('2d');
     var lineChart = new Chart(ctx, {
@@ -187,7 +181,7 @@
             labels: labels,
             datasets: [{
                 label: 'Траты',
-                data: displayData,
+                data: expenseData,
                 fill: false,
                 borderColor: 'rgb(255,98,97)',
                 tension: 0.1,
@@ -209,13 +203,24 @@
                 label: 'Прогноз расхода',
                 data: lineData,
                 fill: false,
-                borderColor: 'rgb(128,128,128)', // Серый цвет линии
+                borderColor: 'rgb(128,128,128)',
                 tension: 0.1,
-                pointRadius: 10, // Размер точек на графике
-                pointHoverRadius: 10, // Размер точек при наведении
-                pointBackgroundColor: 'rgba(128,128,128, 0)', // Цвет точек
+                pointRadius: 10,
+                pointHoverRadius: 10,
+                pointBackgroundColor: 'rgba(128,128,128, 0)',
                 pointBorderColor: 'rgba(128,128,128, 0)',
-                borderDash: [5, 5] // Пунктирная линия
+                borderDash: [5, 5]
+            }, {
+                label: 'План дальнейших расходов',
+                data: planData,
+                fill: false,
+                borderColor: 'rgb(255,98,97)',
+                tension: 0.1,
+                pointRadius: 10,
+                pointHoverRadius: 10,
+                pointBackgroundColor: 'rgba(128,128,128, 0)',
+                pointBorderColor: 'rgba(128,128,128, 0)',
+                borderDash: [4, 4]
             }]
         },
         options: {
@@ -237,21 +242,20 @@
                 x: {
                     title: {
                         display: true,
-                        text: 'Day of Month'
+                        text: 'Дни месяца'
                     }
                 },
                 y: {
                     title: {
                         display: true,
-                        text: 'Cumulative Amount'
+                        text: 'Накапливающаяся сумма'
                     },
-                    beginAtZero: true // Начинать с нуля на оси Y
+                    beginAtZero: true,
+                    max: maxYValue
                 }
             }
         }
     });
 </script>
-
-
 </body>
 </html>

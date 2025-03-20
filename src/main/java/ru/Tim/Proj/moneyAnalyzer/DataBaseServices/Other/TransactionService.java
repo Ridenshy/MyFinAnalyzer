@@ -133,8 +133,6 @@ public class TransactionService {
             else {
                 if (transferType.name().equals("INCOME")) {
                     cumulativeMa.put(day, cumulativeSum);
-                } else {
-                    cumulativeMa.put(day, BigDecimal.ONE.negate());
                 }
             }
         }
