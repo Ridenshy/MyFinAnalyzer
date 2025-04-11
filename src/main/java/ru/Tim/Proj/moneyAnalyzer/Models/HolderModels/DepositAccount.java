@@ -135,10 +135,7 @@ public class DepositAccount extends MoneyHolders {
         }
     }
 
-    @Override
-    public void calculateMinAmount() {
 
-    }
 
     public LocalDate calculateNextInterestDate(LocalDate date) {
         return switch (interestPeriod) {

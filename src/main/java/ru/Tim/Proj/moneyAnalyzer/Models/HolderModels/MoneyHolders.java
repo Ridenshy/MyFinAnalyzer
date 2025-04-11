@@ -77,5 +77,4 @@ public abstract class MoneyHolders {
 
     public abstract void calculateInterest();
 
-    public abstract void calculateMinAmount();
 }

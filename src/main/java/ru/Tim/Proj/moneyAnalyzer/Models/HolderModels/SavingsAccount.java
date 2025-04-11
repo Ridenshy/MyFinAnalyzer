@@ -99,7 +99,7 @@ public class SavingsAccount extends MoneyHolders {
 
         if (!currentDate.isBefore(nextInterestDate) && !currentDate.isEqual(nextInterestDate)) {
             int daysScale = yearCheck ? 36600 : 36500;
-            BigDecimal balance = minAmount;
+            BigDecimal balance = getAmount();
             BigDecimal rate = interestRate.divide(BigDecimal.valueOf(daysScale), 8, RoundingMode.HALF_UP);
             nonCapitalizedInterest = nonCapitalizedInterest.add(balance.multiply(rate));
             nextInterestDate = nextInterestDate.plusDays(1);
@@ -107,14 +107,6 @@ public class SavingsAccount extends MoneyHolders {
 
     }
 
-    @Override
-    public void calculateMinAmount() {
-        BigDecimal curAmount = getAmount();
-        updateDate = LocalDate.now();
-        if(minAmount.compareTo(curAmount) > 0){
-            minAmount = curAmount;
-        }
-    }
 
     public void calcWhileNormalDate(){
         while(nextInterestDate.isBefore(LocalDate.now())){

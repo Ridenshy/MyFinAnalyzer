@@ -160,6 +160,7 @@
 </div>
 <script th:inline="javascript">
     // Пример данных для проверки
+    var incCap = /*[[${incomeCap}]]*/ {};
     var cumulativeAmount = /*[[${cumulativeAmount}]]*/ {};
     var cumulativeIncomeAmount = /*[[${cumulativeIncomeAmount}]]*/ {};
     var spendingLine = /*[[${spendingLine}]]*/ {};
@@ -172,7 +173,13 @@
     var planData = Object.values(planOfExpenses);
 
     var lastIncomeValue = incomeData[incomeData.length - 1] || 0;
-    var maxYValue = lastIncomeValue + (lastIncomeValue * 0.10);
+
+    var maxYValue;
+    if (incCap < lastIncomeValue) {
+        maxYValue = lastIncomeValue + (lastIncomeValue * 0.10);
+    } else {
+        maxYValue = incCap;
+    }
 
     var ctx = document.getElementById('lineChart').getContext('2d');
     var lineChart = new Chart(ctx, {

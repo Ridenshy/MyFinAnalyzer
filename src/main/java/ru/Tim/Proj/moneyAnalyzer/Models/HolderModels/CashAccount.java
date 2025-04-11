@@ -17,8 +17,5 @@ public class CashAccount extends MoneyHolders {
     @Override
     public void calculateInterest() {}
 
-    @Override
-    public void calculateMinAmount() {
 
-    }
 }

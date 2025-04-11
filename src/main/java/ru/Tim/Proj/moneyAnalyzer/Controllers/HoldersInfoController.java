@@ -91,7 +91,6 @@ public class HoldersInfoController {
         savings.setUpdateDate(now);
         savings.setNextInterestDate(savings.getOpenDate());
         savings.setDropDate(savings.getOpenDate().plusMonths(1));
-        savings.calculateMinAmount();
         savings.calcWhileNormalDate();
         holdersService.createOrUpdateHolder(savings);
         return "redirect:/profile/holders";
@@ -156,7 +155,7 @@ public class HoldersInfoController {
             getterAccount.setAmount(getterAmount.subtract(amount));
             savingsAccount.setAmount(savingsAmount.add(amount));
         }
-        savingsAccount.calculateMinAmount();
+
         holdersService.createOrUpdateHolder(savingsAccount);
         holdersService.createOrUpdateHolder(getterAccount);
 

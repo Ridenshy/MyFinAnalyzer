@@ -280,6 +280,9 @@ public class AnalyticsController {
         YearMonth prevMonthDate = currentDate.minusMonths(1);
         YearMonth nextMonthDate = currentDate.plusMonths(1);
 
+        BigDecimal incCap = iPlannedService.getTotalPlanAmount(id, date);
+
+
         Map<Integer, BigDecimal> daysMap = transactionService.getMonthAmount(id, date);
         Map<Integer, BigDecimal> spendingLine = new HashMap<>();
         BigDecimal total = BigDecimal.ZERO;
@@ -323,6 +326,7 @@ public class AnalyticsController {
         model.addAttribute("cumulativeIncomeAmount", cumulativeIncomeAmount);
         model.addAttribute("planOfExpenses", planExpenseGrowth);
         model.addAttribute("spendingLine", spendingLine);
+        model.addAttribute("incomeCap", incCap);
         return "analyticspages/balanceDynamic";
     }
 
